@@ -180,7 +180,7 @@ All agent interactions are visible in the UI with color-coded messages!
 ## 📁 Project Structure
 
 ```
-ag-ui-adk-demo-v2/
+ag-ui-a2a-demo/
 ├── app/                              # Next.js App Router
 │   ├── api/copilotkit/
 │   │   └── route.ts                  # A2A middleware setup (4 agents) ⭐
