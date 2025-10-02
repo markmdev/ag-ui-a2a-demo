@@ -22,12 +22,11 @@ export default function Home() {
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Travel Planning</h1>
           <p className="text-sm text-gray-600 leading-relaxed">
-            Multi-Agent A2A Demo: <span className="text-emerald-600 font-semibold">1 LangGraph</span> +{" "}
+            Multi-Agent A2A Demo:{" "}
+            <span className="text-emerald-600 font-semibold">1 LangGraph</span> +{" "}
             <span className="text-blue-600 font-semibold">3 ADK</span> agents
           </p>
-          <p className="text-xs text-gray-500 mt-1">
-            Orchestrator-mediated A2A Protocol
-          </p>
+          <p className="text-xs text-gray-500 mt-1">Orchestrator-mediated A2A Protocol</p>
         </div>
 
         {/* Chat Component */}
@@ -44,40 +43,41 @@ export default function Home() {
         <div className="p-4 border-t border-gray-200 space-y-3 text-xs">
           <div className="font-semibold text-gray-700 text-[11px] mb-2">AGENT FRAMEWORK</div>
 
-          {/* LangGraph Agent */}
-          <div className="space-y-1.5">
-            <div className="text-[10px] font-semibold text-emerald-700 uppercase tracking-wide">
-              🔗 LangGraph (Python + OpenAI)
+          <div className="flex flex-row justify-between">
+            {/* LangGraph Agent */}
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-emerald-700 uppercase tracking-wide">
+                🔗 LangGraph (Python + OpenAI)
+              </div>
+              <div className="pl-2 space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                  <span className="text-gray-600">Itinerary Agent</span>
+                </div>
+              </div>
             </div>
-            <div className="pl-2 space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                <span className="text-gray-600">Itinerary Agent</span>
+
+            {/* ADK Agents */}
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">
+                ✨ ADK (Python + Gemini)
+              </div>
+              <div className="pl-2 space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                  <span className="text-gray-600">Weather Agent</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                  <span className="text-gray-600">Restaurant Agent</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                  <span className="text-gray-600">Budget Agent</span>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* ADK Agents */}
-          <div className="space-y-1.5">
-            <div className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">
-              ✨ ADK (Python + Gemini)
-            </div>
-            <div className="pl-2 space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                <span className="text-gray-600">Weather Agent</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                <span className="text-gray-600">Restaurant Agent</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                <span className="text-gray-600">Budget Agent</span>
-              </div>
-            </div>
-          </div>
-
           {/* Orchestrator */}
           <div className="pt-2 border-t border-gray-200">
             <div className="flex items-center gap-2">
@@ -96,7 +96,8 @@ export default function Home() {
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Travel Plan</h2>
             <p className="text-gray-600">
-              Multi-agent coordination across 4 specialized agents with A2A Protocol and human-in-the-loop approval
+              Multi-agent coordination across 4 specialized agents with A2A Protocol and
+              human-in-the-loop approval
             </p>
           </div>
 
@@ -109,8 +110,8 @@ export default function Home() {
                   Start Planning Your Trip
                 </h3>
                 <p className="text-gray-500 max-w-md">
-                  Ask the assistant to plan a trip. Watch as 4 specialized agents collaborate through
-                  A2A Protocol to create your personalized plan.
+                  Ask the assistant to plan a trip. Watch as 4 specialized agents collaborate
+                  through A2A Protocol to create your personalized plan.
                 </p>
               </div>
             </div>

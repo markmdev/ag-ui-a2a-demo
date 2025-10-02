@@ -537,14 +537,14 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate, onWeatherUpdate, onResta
     render: ({ args }) => {
       // Validate weather data exists and has required fields
       if (!args.weatherData || typeof args.weatherData !== "object") {
-        return null;
+        return <></>;
       }
 
       const weather = args.weatherData as WeatherData;
 
       // Validate weather has required fields
       if (!weather.destination || !weather.forecast || !Array.isArray(weather.forecast)) {
-        return null;
+        return <></>;
       }
 
       return (
