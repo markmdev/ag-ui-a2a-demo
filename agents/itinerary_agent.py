@@ -70,7 +70,7 @@ class ItineraryAgent:
         # Use LLM to extract structured info
         prompt = f"""
         Extract the destination and number of days from this travel request.
-        Return ONLY a JSON object with 'destination' and 'days' fields.
+        Return ONLY a JSON string with 'destination' and 'days' fields.
 
         Request: {message}
 
@@ -78,6 +78,8 @@ class ItineraryAgent:
         """
 
         response = self.llm.invoke(prompt)
+
+        print(response.content)
 
         try:
             parsed = json.loads(response.content)
@@ -97,7 +99,7 @@ class ItineraryAgent:
         prompt = f"""
         Create a detailed {days}-day travel itinerary for {destination}.
 
-        Return ONLY a JSON object with this structure:
+        Return ONLY a JSON string with this structure:
         {{
             "destination": "{destination}",
             "days": {days},
@@ -115,6 +117,11 @@ class ItineraryAgent:
         """
 
         response = self.llm.invoke(prompt)
+        # Remove the markdown code block
+        response.content = response.content.replace("```json", "").replace("```", "")
+        print(response.content)
+        # Return stringified json
+        response.content = json.dumps(response.content)
         state["itinerary"] = response.content
 
         return state
@@ -123,6 +130,7 @@ class ItineraryAgent:
         """Process an incoming A2A message and return an itinerary."""
         # Extract the text from the A2A message
         message_text = message.parts[0].root.text
+        print("Invoking itinerary agent with message: ", message_text)
 
         # Run the LangGraph workflow
         result = self.graph.invoke({
@@ -152,7 +160,7 @@ skill = AgentSkill(
 
 public_agent_card = AgentCard(
     name='Itinerary Agent',
-    description='LangGraph-powered agent that creates detailed travel itineraries',
+    description='LangGraph-powered agent that creates detailed travel itineraries. Returns: a json string representing the itinerary in this format: {{"destination": "Tokyo", "days": 3, "daily_plans": [{{"day": 1, "title": "Day title", "activities": ["Activity 1", "Activity 2", "Activity 3"], "meals": {{"breakfast": "Place", "lunch": "Place", "dinner": "Place"}}}}]}}',
     url=f'http://localhost:{port}/',
     version='1.0.0',
     defaultInputModes=['text'],

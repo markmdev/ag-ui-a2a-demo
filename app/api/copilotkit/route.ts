@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
       - Itinerary Agent: Creates day-by-day travel itineraries
       - Budget Agent: Estimates travel costs and budgets
 
-      Contact both agents for complete travel plans. Present their responses clearly to the user.
+      Contant Itinerary Agent first for the itinerary and then the Budget Agent for the budget.
+      Once you have an itinerary, don't reach back out to the Itinerary Agent again.
     `,
   });
 

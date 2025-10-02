@@ -35,7 +35,6 @@ from a2a.utils import (
 
 # Google ADK imports
 from google.adk.agents.llm_agent import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
@@ -68,11 +67,12 @@ class BudgetAgent:
 
     def _build_agent(self) -> LlmAgent:
         """Build the LLM agent for budget estimation using ADK."""
-        # Use environment variable for model selection, defaulting to gemini-2.0-flash
-        LITELLM_MODEL = os.getenv('LITELLM_MODEL', 'gemini/gemini-2.0-flash-exp')
+        # Use native Gemini model directly (better performance than LiteLLM)
+        # Match the orchestrator model for consistency
+        model_name = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
 
         return LlmAgent(
-            model=LiteLlm(model=LITELLM_MODEL),
+            model=model_name,  # Direct model string, no LiteLlm wrapper needed
             name='budget_agent',
             description='An agent that estimates travel costs and creates detailed budget breakdowns',
             instruction="""
@@ -102,7 +102,7 @@ Make realistic estimates based on:
 - Number of people if mentioned
 - Any specific activities or requirements mentioned
 
-Return ONLY the JSON object, no additional text before or after.
+ CRITICAL: Return ONLY a JSON string representing the itinerary, no markdown, no explanation, no extra text.
             """,
             tools=[],  # No tools needed for this agent currently
         )
