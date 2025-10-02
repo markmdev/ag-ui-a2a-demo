@@ -28,7 +28,7 @@ type MessageActionRenderProps = ActionRenderProps<
       readonly name: "task";
       readonly type: "string";
       readonly description: "The message to send to the A2A agent";
-    },
+    }
   ]
 >;
 
@@ -66,7 +66,9 @@ const MessageToA2A = ({ status, args }: MessageActionRenderProps) => {
           </span>
           <span className="text-gray-400 text-sm">→</span>
           <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAgentColor(args.agentName)}`}
+            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAgentColor(
+              args.agentName
+            )}`}
           >
             {args.agentName}
           </span>
@@ -102,18 +104,13 @@ const MessageFromA2A = ({ status, args, result }: MessageActionRenderProps) => {
     return "bg-gray-100 text-gray-700 border-gray-300";
   };
 
-  // Try to parse and prettify JSON responses
+  // Format plain text results with line breaks preserved
   const formatResult = (result: string) => {
-    try {
-      const parsed = JSON.parse(result);
-      return (
-        <pre className="text-xs bg-white p-2 rounded overflow-x-auto max-w-full">
-          {JSON.stringify(parsed, null, 2)}
-        </pre>
-      );
-    } catch {
-      return <span className="text-sm">{result}</span>;
-    }
+    return (
+      <pre className="text-xs bg-white p-3 rounded overflow-x-auto max-w-full whitespace-pre-wrap font-sans">
+        {result}
+      </pre>
+    );
   };
 
   return (
@@ -121,7 +118,9 @@ const MessageFromA2A = ({ status, args, result }: MessageActionRenderProps) => {
       <div className="flex items-start gap-3">
         <div className="flex items-center gap-2 min-w-[200px] flex-shrink-0">
           <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAgentColor(args.agentName)}`}
+            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAgentColor(
+              args.agentName
+            )}`}
           >
             {args.agentName}
           </span>
@@ -187,11 +186,7 @@ const ChatInner = () => {
  */
 export default function TravelChat() {
   return (
-    <CopilotKit
-      runtimeUrl="/api/copilotkit"
-      showDevConsole={false}
-      agent="travel_planner"
-    >
+    <CopilotKit runtimeUrl="/api/copilotkit" showDevConsole={false} agent="a2a_chat">
       <ChatInner />
     </CopilotKit>
   );

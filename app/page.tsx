@@ -1,5 +1,6 @@
 "use client";
 
+import A2AChat from "@/components/a2a_chat";
 import TravelChat from "@/components/travel-chat";
 
 export default function Home() {
@@ -8,18 +9,18 @@ export default function Home() {
       <div className="w-full max-w-6xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            AG-UI + A2A Demo
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">AG-UI + A2A Demo</h1>
           <p className="text-gray-600">
-            Agent-to-Agent communication with <span className="text-blue-600 font-semibold">ADK</span> and{" "}
+            Agent-to-Agent communication with{" "}
+            <span className="text-blue-600 font-semibold">ADK</span> and{" "}
             <span className="text-purple-600 font-semibold">LangGraph</span>
           </p>
         </div>
 
         {/* Chat Component */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <TravelChat />
+          {/* <TravelChat /> */}
+          <A2AChat />
         </div>
 
         {/* Agent Legend */}

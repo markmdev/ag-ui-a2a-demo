@@ -99,29 +99,22 @@ class ItineraryAgent:
         prompt = f"""
         Create a detailed {days}-day travel itinerary for {destination}.
 
-        Return ONLY a JSON string with this structure:
-        {{
-            "destination": "{destination}",
-            "days": {days},
-            "daily_plans": [
-                {{
-                    "day": 1,
-                    "title": "Day title",
-                    "activities": ["Activity 1", "Activity 2", "Activity 3"],
-                    "meals": {{"breakfast": "Place", "lunch": "Place", "dinner": "Place"}}
-                }}
-            ]
-        }}
+        Format your response as plain text with clear sections for each day:
 
-        Make it realistic and interesting.
+        Day 1: [Title]
+        Morning: [activities]
+        Afternoon: [activities]
+        Evening: [activities]
+        Meals: Breakfast at [place], Lunch at [place], Dinner at [place]
+
+        Day 2: [Title]
+        ...
+
+        Make it realistic, interesting, and easy to read.
         """
 
         response = self.llm.invoke(prompt)
-        # Remove the markdown code block
-        response.content = response.content.replace("```json", "").replace("```", "")
         print(response.content)
-        # Return stringified json
-        response.content = json.dumps(response.content)
         state["itinerary"] = response.content
 
         return state
@@ -160,7 +153,7 @@ skill = AgentSkill(
 
 public_agent_card = AgentCard(
     name='Itinerary Agent',
-    description='LangGraph-powered agent that creates detailed travel itineraries. Returns: a json string representing the itinerary in this format: {{"destination": "Tokyo", "days": 3, "daily_plans": [{{"day": 1, "title": "Day title", "activities": ["Activity 1", "Activity 2", "Activity 3"], "meals": {{"breakfast": "Place", "lunch": "Place", "dinner": "Place"}}}}]}}',
+    description='LangGraph-powered agent that creates detailed day-by-day travel itineraries in plain text format with activities and meal recommendations.',
     url=f'http://localhost:{port}/',
     version='1.0.0',
     defaultInputModes=['text'],

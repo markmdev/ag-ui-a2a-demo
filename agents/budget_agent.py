@@ -15,23 +15,15 @@ load_dotenv()
 # A2A Protocol imports
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.tasks import InMemoryTaskStore, TaskUpdater
+from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import (
     AgentCapabilities,
     AgentCard,
     AgentSkill,
-    Message,
-    TaskState,
-    Part,
-    TextPart
 )
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
-from a2a.utils import (
-    new_agent_text_message,
-    new_agent_parts_message,
-    new_task
-)
+from a2a.utils import new_agent_text_message
 
 # Google ADK imports
 from google.adk.agents.llm_agent import LlmAgent
@@ -79,21 +71,19 @@ class BudgetAgent:
 You are a travel budget planning agent. Your role is to estimate realistic travel budgets based on user requests.
 
 When you receive a travel request, analyze the destination, duration, and any other details provided.
-Then create a detailed budget breakdown with the following structure:
+Then create a detailed budget breakdown in plain text format:
 
-{
-    "total_budget": <total amount in numbers>,
-    "currency": "USD",
-    "per_person": true/false,
-    "breakdown": [
-        {"category": "Accommodation", "amount": <amount>, "percentage": <percentage>},
-        {"category": "Food", "amount": <amount>, "percentage": <percentage>},
-        {"category": "Transportation", "amount": <amount>, "percentage": <percentage>},
-        {"category": "Activities", "amount": <amount>, "percentage": <percentage>},
-        {"category": "Miscellaneous", "amount": <amount>, "percentage": <percentage>}
-    ],
-    "notes": "<brief explanation of the budget estimate>"
-}
+TOTAL BUDGET: $X,XXX USD (per person / total)
+
+BREAKDOWN:
+- Accommodation: $X,XXX (XX%)
+- Food & Dining: $X,XXX (XX%)
+- Transportation: $X,XXX (XX%)
+- Activities & Attractions: $X,XXX (XX%)
+- Miscellaneous: $X,XXX (XX%)
+
+NOTES:
+[Brief explanation of the budget estimate, including any assumptions made]
 
 Make realistic estimates based on:
 - The destination (cost of living in that location)
@@ -101,8 +91,6 @@ Make realistic estimates based on:
 - Type of travel (budget, mid-range, luxury if specified)
 - Number of people if mentioned
 - Any specific activities or requirements mentioned
-
- CRITICAL: Return ONLY a JSON string representing the itinerary, no markdown, no explanation, no extra text.
             """,
             tools=[],  # No tools needed for this agent currently
         )
@@ -210,50 +198,26 @@ class BudgetAgentExecutor(AgentExecutor):
         event_queue: EventQueue,
     ) -> None:
         """
-        Execute the agent and stream results back via A2A Protocol.
+        Execute the agent and send results back via A2A Protocol.
 
-        This method handles the streaming events from the ADK agent and
-        translates them into A2A Protocol events for the task.
+        Simplified to match the Itinerary Agent pattern - just stream
+        and return the final text message without task complexity.
         """
         # Extract the user's query from the context
         query = context.get_user_input()
-        task = context.current_task
 
-        # Create a new task if one doesn't exist
-        # This allows us to track status updates during processing
-        if not task:
-            task = new_task(context.message)
-            await event_queue.enqueue_event(task)
+        # Use a session ID from context if available, otherwise generate one
+        session_id = getattr(context, 'context_id', 'default_session')
 
-        # Create a task updater to manage task status
-        updater = TaskUpdater(event_queue, task.id, task.context_id)
+        # Stream events from the ADK agent and get the final result
+        final_content = ""
+        async for item in self.agent.stream(query, session_id):
+            if item['is_task_complete']:
+                final_content = item['content']
+                break
 
-        # Stream events from the ADK agent
-        async for item in self.agent.stream(query, task.context_id):
-            is_task_complete = item['is_task_complete']
-
-            if not is_task_complete:
-                # Send intermediate status update
-                await updater.update_status(
-                    TaskState.working,
-                    new_agent_text_message(
-                        item['updates'], task.context_id, task.id
-                    ),
-                )
-                continue
-
-            # Task is complete - send the final result
-            content = item['content']
-
-            # Add the response as an artifact
-            await updater.add_artifact(
-                [Part(root=TextPart(text=content))],
-                name='budget_estimate'
-            )
-
-            # Mark task as complete
-            await updater.complete()
-            break
+        # Send the final result as a simple text message
+        await event_queue.enqueue_event(new_agent_text_message(final_content))
 
     async def cancel(
         self, context: RequestContext, event_queue: EventQueue
