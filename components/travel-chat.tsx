@@ -36,9 +36,14 @@ type MessageActionRenderProps = ActionRenderProps<
  * Component to render outgoing messages TO A2A agents
  */
 const MessageToA2A = ({ status, args }: MessageActionRenderProps) => {
-  // Only show when message is being sent or completed
-  if (status !== "executing" && status !== "complete") {
-    return null;
+  // Use switch statement like dojo example for clarity
+  switch (status) {
+    case "executing":
+    case "complete":
+      // Message is active, render it
+      break;
+    default:
+      return null;
   }
 
   // Determine agent color based on agent name
@@ -76,9 +81,14 @@ const MessageToA2A = ({ status, args }: MessageActionRenderProps) => {
  * Component to render incoming responses FROM A2A agents
  */
 const MessageFromA2A = ({ status, args, result }: MessageActionRenderProps) => {
-  // Only show when we have a result
-  if (status !== "complete" || !result) {
-    return null;
+  // Use switch statement like dojo example for clarity
+  switch (status) {
+    case "complete":
+      // Only render if we have a result
+      if (!result) return null;
+      break;
+    default:
+      return null;
   }
 
   // Determine agent color based on agent name

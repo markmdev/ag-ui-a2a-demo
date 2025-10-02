@@ -29,16 +29,7 @@ orchestrator_agent = LlmAgent(
     name="OrchestratorAgent",
     model="gemini-2.5-flash",
     instruction="""
-    You are a helpful travel planning assistant.
-
-    You can delegate tasks to specialized agents:
-    - Itinerary Agent: Creates detailed day-by-day travel plans
-    - Budget Agent: Estimates costs and creates budget breakdowns
-
-    Contant Itinerary Agent first for the itinerary and then the Budget Agent for the budget.
-    Once you have an itinerary, don't reach back out to the Itinerary Agent again.
-
-    Please delegate as needed to provide comprehensive travel planning help.
+    You are a helpful assistant. Please delegate as needed.
     """,
 )
 

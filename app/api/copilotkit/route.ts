@@ -36,21 +36,22 @@ export async function POST(request: NextRequest) {
   // It automatically adds the send_message_to_a2a_agent tool to the orchestrator
   const a2aMiddlewareAgent = new A2AMiddlewareAgent({
     description: "Travel planning assistant with itinerary and budget agents",
-    // The orchestrator agent (speaks AG-UI Protocol)
-    orchestrationAgent,
     // The A2A agent URLs (speak A2A Protocol)
     agentUrls: [itineraryAgentUrl, budgetAgentUrl],
-    // Keep instructions simple and clear
+    // The orchestrator agent (speaks AG-UI Protocol)
+    orchestrationAgent,
+    // Simple domain-specific instructions only
+    // The middleware adds comprehensive routing instructions automatically
     instructions: `
-      You coordinate travel planning by delegating to specialized agents.
+      You are a travel planning assistant.
 
-      Available agents:
-      - Itinerary Agent: Creates day-by-day travel itineraries
-      - Budget Agent: Estimates travel costs and budgets
+      When a user wants to plan a trip:
+      - Use the Itinerary Agent to create detailed day-by-day itineraries
+      - Use the Budget Agent to estimate travel costs
 
-      Contant Itinerary Agent first for the itinerary and then the Budget Agent for the budget.
-      Once you have an itinerary, don't reach back out to the Itinerary Agent again.
+      Always present results to the user in a clear, friendly way.
     `,
+    debug: true, // Enable debug logging
   });
 
   // Create the CopilotKit runtime with our A2A middleware agent
