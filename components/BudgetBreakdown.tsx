@@ -1,13 +1,5 @@
-/**
- * BudgetBreakdown Component
- *
- * Displays a beautiful budget breakdown with visual bars showing
- * the percentage breakdown of travel costs by category.
- */
-
 import React from "react";
 
-// Type definitions matching the backend structure
 interface BudgetCategory {
   category: string;
   amount: number;
@@ -26,7 +18,6 @@ interface BudgetBreakdownProps {
 }
 
 export const BudgetBreakdown: React.FC<BudgetBreakdownProps> = ({ data }) => {
-  // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -36,7 +27,6 @@ export const BudgetBreakdown: React.FC<BudgetBreakdownProps> = ({ data }) => {
     }).format(amount);
   };
 
-  // Color mapping for categories using CopilotCloud Palette
   const getCategoryColor = (index: number) => {
     const colors = [
       { bg: "#BEC2FF", light: "rgba(190, 194, 255, 0.1)", text: "#010507" }, // Lilac
@@ -51,7 +41,6 @@ export const BudgetBreakdown: React.FC<BudgetBreakdownProps> = ({ data }) => {
 
   return (
     <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 my-3 border-2 border-[#DBDBE5] shadow-elevation-md animate-fade-in-up">
-      {/* Header */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -72,13 +61,11 @@ export const BudgetBreakdown: React.FC<BudgetBreakdownProps> = ({ data }) => {
         )}
       </div>
 
-      {/* Breakdown */}
       <div className="space-y-2">
         {data.breakdown.map((category, index) => {
           const colors = getCategoryColor(index);
           return (
             <div key={index} className="bg-white/80 backdrop-blur-sm rounded-lg p-2 shadow-elevation-sm border border-[#E9E9EF]">
-              {/* Category Header */}
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   <div
@@ -99,7 +86,6 @@ export const BudgetBreakdown: React.FC<BudgetBreakdownProps> = ({ data }) => {
                 </div>
               </div>
 
-              {/* Progress Bar */}
               <div className="w-full bg-[#E9E9EF] rounded-full h-2 overflow-hidden">
                 <div
                   className="h-full transition-all duration-1000 ease-out rounded-full"

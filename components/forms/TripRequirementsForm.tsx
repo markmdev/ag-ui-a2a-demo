@@ -1,23 +1,3 @@
-/**
- * TripRequirementsForm Component
- *
- * A form component that collects essential trip planning information:
- * - Destination city
- * - Number of days (1-7)
- * - Number of people (1-15)
- * - Budget level (Economy/Comfort/Premium)
- *
- * This form is shown at the start of the travel planning workflow
- * before any agents are called. It implements Human-in-the-Loop (HITL)
- * pattern by waiting for user input before proceeding.
- *
- * Features:
- * - Pre-filling from orchestrator extraction (if user mentions details)
- * - Form validation
- * - Visual feedback (sliders, buttons)
- * - Success state after submission
- */
-
 import React, { useState, useEffect } from "react";
 
 interface TripRequirementsFormProps {
@@ -26,7 +6,6 @@ interface TripRequirementsFormProps {
 }
 
 export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args, respond }) => {
-  // Parse args if it's a string (sometimes CopilotKit passes stringified JSON)
   let parsedArgs = args;
   if (typeof args === "string") {
     try {
@@ -36,19 +15,13 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
     }
   }
 
-  // Initialize state with default values
   const [city, setCity] = useState("");
   const [numberOfDays, setNumberOfDays] = useState(3);
   const [numberOfPeople, setNumberOfPeople] = useState(2);
   const [budgetLevel, setBudgetLevel] = useState("Comfort");
   const [submitted, setSubmitted] = useState(false);
-
-  // Validation state
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Update state when parsedArgs changes (pre-fill from orchestrator)
-  // This allows the orchestrator to extract values from user messages like
-  // "Plan a 5-day trip to Paris for 2 people" and pre-fill the form
   useEffect(() => {
     if (parsedArgs && parsedArgs.city && parsedArgs.city !== city) {
       setCity(parsedArgs.city);
@@ -64,9 +37,6 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
     }
   }, [parsedArgs?.city, parsedArgs?.numberOfDays, parsedArgs?.numberOfPeople, parsedArgs?.budgetLevel]);
 
-  /**
-   * Validate form inputs before submission
-   */
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -86,10 +56,6 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
     return Object.keys(newErrors).length === 0;
   };
 
-  /**
-   * Handle form submission
-   * Sends trip requirements back to the orchestrator
-   */
   const handleSubmit = () => {
     if (!validateForm()) {
       return;
@@ -104,7 +70,6 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
     });
   };
 
-  // Show success state after submission
   if (submitted) {
     return (
       <div className="bg-[#85E0CE]/30 backdrop-blur-md border-2 border-[#85E0CE] rounded-lg p-4 my-3 shadow-elevation-md">
@@ -122,10 +87,8 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
     );
   }
 
-  // Render the form
   return (
     <div className="bg-[#BEC2FF]/30 backdrop-blur-md border-2 border-[#BEC2FF] rounded-lg p-4 my-3 shadow-elevation-md">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <div className="text-2xl">✈️</div>
         <div>
@@ -134,9 +97,7 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
         </div>
       </div>
 
-      {/* Form Fields */}
       <div className="space-y-3">
-        {/* City Input */}
         <div>
           <label className="block text-xs font-medium text-[#010507] mb-1.5">
             Destination City *
@@ -155,9 +116,7 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
           {errors.city && <p className="text-xs text-[#FFAC4D] mt-1">{errors.city}</p>}
         </div>
 
-        {/* Number of Days and People - Side by side */}
         <div className="grid grid-cols-2 gap-3">
-          {/* Number of Days */}
           <div>
             <label className="block text-xs font-medium text-[#010507] mb-1.5">
               Days (1-7) *
@@ -184,7 +143,6 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
             )}
           </div>
 
-          {/* Number of People */}
           <div>
             <label className="block text-xs font-medium text-[#010507] mb-1.5">
               People (1-15) *
@@ -212,7 +170,6 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
           </div>
         </div>
 
-        {/* Budget Level Selector */}
         <div>
           <label className="block text-xs font-medium text-[#010507] mb-1.5">Budget Level *</label>
           <div className="grid grid-cols-3 gap-2">
@@ -238,7 +195,6 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
         </div>
       </div>
 
-      {/* Submit Button */}
       <div className="mt-4">
         <button
           onClick={handleSubmit}

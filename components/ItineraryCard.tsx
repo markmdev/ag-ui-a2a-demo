@@ -1,13 +1,5 @@
-/**
- * ItineraryCard Component
- *
- * Displays a beautiful, structured travel itinerary with day-by-day breakdown.
- * Shows activities for morning, afternoon, evening, and meal recommendations.
- */
-
 import React from "react";
 
-// Type definitions matching the backend structure
 interface TimeSlot {
   activities: string[];
   location: string;
@@ -34,7 +26,6 @@ export interface ItineraryData {
   itinerary: DayItinerary[];
 }
 
-// Restaurant data structure for day-by-day meals
 export interface RestaurantData {
   destination: string;
   days: number;
@@ -48,11 +39,10 @@ export interface RestaurantData {
 
 interface ItineraryCardProps {
   data: ItineraryData;
-  restaurantData?: RestaurantData | null; // Optional restaurant data to populate meals
+  restaurantData?: RestaurantData | null;
 }
 
 export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantData }) => {
-  // Get meals for a specific day from restaurant data
   const getMealsForDay = (dayNumber: number): Meals | null => {
     if (!restaurantData) return null;
 
@@ -68,7 +58,6 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
 
   return (
     <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 my-3 border-2 border-[#DBDBE5] shadow-elevation-md animate-fade-in-up">
-      {/* Header */}
       <div className="mb-3">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🗺️</span>
@@ -79,17 +68,13 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
         </p>
       </div>
 
-      {/* Days */}
       <div className="space-y-3">
         {data.itinerary.map((day, index) => {
-          // Try to get restaurant meals for this day
           const restaurantMeals = getMealsForDay(day.day);
-          // Use restaurant meals if available, otherwise use original itinerary meals
           const mealsToDisplay = restaurantMeals || day.meals;
 
           return (
             <div key={index} className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-elevation-sm border border-[#E9E9EF]">
-              {/* Day Header */}
               <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#DBDBE5]">
                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#BEC2FF] text-white font-bold text-sm">
                   {day.day}
@@ -97,15 +82,12 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                 <h3 className="text-lg font-semibold text-[#010507]">{day.title}</h3>
               </div>
 
-              {/* Time Slots and Meals Side-by-Side */}
               <div className="grid grid-cols-1 lg:grid-cols-7 gap-2">
-                {/* Time Slots - Takes 1 column */}
                 <div className="lg:col-span-3 space-y-2">
                   <div className="flex items-center gap-1 mb-1">
                     <span className="text-sm">📅</span>
                     <h4 className="text-sm font-semibold text-[#010507]">Day Itinerary</h4>
                   </div>
-                  {/* Morning */}
                   <TimeSlotSection
                     icon="🌅"
                     title="Morning"
@@ -113,8 +95,6 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                     activities={day.morning.activities}
                     color="orange"
                   />
-
-                  {/* Afternoon */}
                   <TimeSlotSection
                     icon="☀️"
                     title="Afternoon"
@@ -122,8 +102,6 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                     activities={day.afternoon.activities}
                     color="yellow"
                   />
-
-                  {/* Evening */}
                   <TimeSlotSection
                     icon="🌆"
                     title="Evening"
@@ -133,7 +111,6 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                   />
                 </div>
 
-                {/* Meals - Takes 2 columns */}
                 <div className="lg:col-span-4 flex flex-col">
                   <div className="lg:border-l lg:border-[#DBDBE5] lg:pl-2 flex flex-col h-full">
                     <div className="flex items-center gap-1 mb-1">
@@ -153,7 +130,6 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                           <MealItem icon="🍷" label="Dinner" meal={mealsToDisplay.dinner} />
                         </>
                       ) : (
-                        // Show placeholder while waiting for restaurant data
                         <>
                           <div className="flex-1 flex items-center justify-center bg-[#F7F7F9] rounded p-1">
                             <span className="text-[10px] text-[#838389]">
@@ -184,7 +160,6 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
   );
 };
 
-// Helper component for time slots
 interface TimeSlotSectionProps {
   icon: string;
   title: string;
@@ -225,7 +200,6 @@ const TimeSlotSection: React.FC<TimeSlotSectionProps> = ({
   );
 };
 
-// Helper component for meals
 interface MealItemProps {
   icon: string;
   label: string;

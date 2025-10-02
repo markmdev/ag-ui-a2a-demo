@@ -1,20 +1,3 @@
-/**
- * BudgetApprovalCard Component
- *
- * A Human-in-the-Loop (HITL) component for budget approval workflow.
- * Displays the travel budget breakdown and allows the user to approve or reject it.
- *
- * Features:
- * - Visual budget summary with total
- * - Category breakdown with amounts and percentages
- * - Approve/Reject buttons
- * - State management for approval/rejection
- * - Visual feedback for approved/rejected states
- *
- * This component demonstrates the HITL pattern where the agent workflow
- * pauses and waits for explicit user approval before proceeding.
- */
-
 import React from "react";
 import { BudgetData } from "../types";
 
@@ -33,9 +16,6 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
   onApprove,
   onReject,
 }) => {
-  /**
-   * Format currency values consistently
-   */
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -47,7 +27,6 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
 
   return (
     <div className="bg-[#FFF388]/30 backdrop-blur-md border-2 border-[#FFF388] rounded-lg p-4 my-3 shadow-elevation-md">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <div className="text-2xl">💰</div>
         <div>
@@ -56,7 +35,6 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
         </div>
       </div>
 
-      {/* Budget Summary */}
       <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 mb-3 border border-[#DBDBE5] shadow-elevation-sm">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[#57575B] font-medium text-sm">Total Budget</span>
@@ -65,7 +43,6 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
           </span>
         </div>
 
-        {/* Breakdown */}
         <div className="space-y-1.5">
           {budgetData.breakdown?.map((category, idx) => (
             <div key={idx} className="flex items-center justify-between text-xs">
@@ -80,7 +57,6 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
           ))}
         </div>
 
-        {/* Notes */}
         {budgetData.notes && (
           <div className="mt-2 pt-2 border-t border-[#E9E9EF]">
             <p className="text-xs text-[#57575B]">{budgetData.notes}</p>
@@ -88,7 +64,6 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
         )}
       </div>
 
-      {/* Rejection Message */}
       {isRejected && (
         <div className="bg-[#FFAC4D]/20 border border-[#FFAC4D] rounded-lg p-2.5 mb-3">
           <div className="flex items-center gap-2 text-[#010507]">
@@ -103,7 +78,6 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
         </div>
       )}
 
-      {/* Action Buttons */}
       <div className="flex gap-2">
         <button
           onClick={onApprove}
