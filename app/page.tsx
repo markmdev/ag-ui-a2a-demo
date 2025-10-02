@@ -65,55 +65,6 @@ export default function Home() {
             onRestaurantUpdate={setRestaurantData}
           />
         </div>
-
-        {/* Agent Legend */}
-        <div className="p-4 border-t border-[#DBDBE5] space-y-3 text-xs">
-          <div className="font-semibold text-[#57575B] text-[11px] mb-2">AGENT FRAMEWORK</div>
-
-          <div className="flex flex-row justify-between">
-            {/* LangGraph Agents */}
-            <div className="space-y-1.5">
-              <div className="text-[10px] font-semibold text-[#1B936F] uppercase tracking-wide">
-                🔗 LangGraph (Python + OpenAI)
-              </div>
-              <div className="pl-2 space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#85E0CE]"></div>
-                  <span className="text-[#57575B]">Itinerary Agent</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#85E0CE]"></div>
-                  <span className="text-[#57575B]">Restaurant Agent</span>
-                </div>
-              </div>
-            </div>
-
-            {/* ADK Agents */}
-            <div className="space-y-1.5">
-              <div className="text-[10px] font-semibold text-[#BEC2FF] uppercase tracking-wide">
-                ✨ ADK (Python + Gemini)
-              </div>
-              <div className="pl-2 space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#BEC2FF]"></div>
-                  <span className="text-[#57575B]">Weather Agent</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#BEC2FF]"></div>
-                  <span className="text-[#57575B]">Budget Agent</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Orchestrator */}
-          <div className="pt-2 border-t border-[#DBDBE5]">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#838389]"></div>
-              <span className="text-[#57575B] font-medium">Orchestrator</span>
-            </div>
-            <div className="text-[10px] text-[#838389] pl-4 mt-0.5">A2A Middleware Coordinator</div>
-          </div>
-        </div>
       </div>
 
       {/* Main Content Area */}
@@ -144,26 +95,26 @@ export default function Home() {
             </div>
           )}
 
-          {/* Display Weather Card (Full Width) */}
-          {weatherData && (
+          {/* Display Itinerary (Top, Two Columns) */}
+          {itineraryData && (
             <div className="mb-4">
-              <WeatherCard data={weatherData} />
+              <ItineraryCard data={itineraryData} restaurantData={restaurantData} />
             </div>
           )}
 
-          {/* Display Itinerary and Budget Side-by-Side */}
-          {(itineraryData || budgetData) && (
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-              {/* Display Itinerary with Restaurant Data */}
-              {itineraryData && (
-                <div className="col-span-3">
-                  <ItineraryCard data={itineraryData} restaurantData={restaurantData} />
+          {/* Display Weather and Budget Side-by-Side */}
+          {(weatherData || budgetData) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Display Weather Card */}
+              {weatherData && (
+                <div>
+                  <WeatherCard data={weatherData} />
                 </div>
               )}
 
               {/* Display Budget */}
               {budgetData && (
-                <div className="col-span-2">
+                <div>
                   <BudgetBreakdown data={budgetData} />
                 </div>
               )}

@@ -67,9 +67,9 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
   };
 
   return (
-    <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 my-3 border-2 border-[#DBDBE5] shadow-elevation-md animate-fade-in-up">
+    <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 my-3 border-2 border-[#DBDBE5] shadow-elevation-md animate-fade-in-up h-[520px] flex flex-col">
       {/* Header */}
-      <div className="mb-3">
+      <div className="mb-3 flex-shrink-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🗺️</span>
           <h2 className="text-xl font-semibold text-[#010507]">{data.destination} Itinerary</h2>
@@ -79,8 +79,8 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
         </p>
       </div>
 
-      {/* Days */}
-      <div className="space-y-3">
+      {/* Days - Scrollable */}
+      <div className="space-y-3 overflow-y-auto flex-1">
         {data.itinerary.map((day, index) => {
           // Try to get restaurant meals for this day
           const restaurantMeals = getMealsForDay(day.day);
@@ -201,9 +201,9 @@ const TimeSlotSection: React.FC<TimeSlotSectionProps> = ({
   color,
 }) => {
   const colorClasses = {
-    orange: "bg-[#FFAC4D]/10 border-[#FFAC4D]",
-    yellow: "bg-[#FFF388]/10 border-[#FFF388]",
-    blue: "bg-[#BEC2FF]/10 border-[#BEC2FF]",
+    orange: "bg-orange-50 border-orange-200",
+    yellow: "bg-amber-50 border-amber-200",
+    blue: "bg-blue-50 border-blue-200",
   };
 
   return (
