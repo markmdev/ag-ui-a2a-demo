@@ -29,8 +29,40 @@ from a2a.utils import new_agent_text_message
 # LangGraph imports
 from langgraph.graph import StateGraph, END
 from langchain_openai import ChatOpenAI
-from typing import TypedDict, Annotated
+from typing import TypedDict, Annotated, List, Optional
 import operator
+from pydantic import BaseModel, Field
+
+
+# Pydantic models for structured output
+class TimeSlot(BaseModel):
+    """Structured data for a time slot in the itinerary."""
+    activities: List[str] = Field(description="List of activities for this time slot")
+    location: str = Field(description="Main location for these activities")
+
+
+class Meals(BaseModel):
+    """Structured data for meals."""
+    breakfast: str = Field(description="Breakfast recommendation with place name")
+    lunch: str = Field(description="Lunch recommendation with place name")
+    dinner: str = Field(description="Dinner recommendation with place name")
+
+
+class DayItinerary(BaseModel):
+    """Structured data for one day of the itinerary."""
+    day: int = Field(description="Day number")
+    title: str = Field(description="Title or theme for this day")
+    morning: TimeSlot = Field(description="Morning activities")
+    afternoon: TimeSlot = Field(description="Afternoon activities")
+    evening: TimeSlot = Field(description="Evening activities")
+    meals: Meals = Field(description="Meal recommendations for the day")
+
+
+class StructuredItinerary(BaseModel):
+    """Complete structured itinerary output."""
+    destination: str = Field(description="Travel destination")
+    days: int = Field(description="Number of days")
+    itinerary: List[DayItinerary] = Field(description="Day-by-day itinerary")
 
 
 # Define the state for our LangGraph agent
@@ -39,6 +71,7 @@ class ItineraryState(TypedDict):
     days: int
     message: str
     itinerary: str
+    structured_itinerary: Optional[dict]  # Add structured output to state
 
 
 class ItineraryAgent:
@@ -92,30 +125,83 @@ class ItineraryAgent:
         return state
 
     def _create_itinerary(self, state: ItineraryState) -> ItineraryState:
-        """Generate a day-by-day itinerary."""
+        """Generate a day-by-day itinerary with structured JSON output."""
         destination = state["destination"]
         days = state["days"]
 
+        # Request structured JSON output from the LLM
         prompt = f"""
         Create a detailed {days}-day travel itinerary for {destination}.
 
-        Format your response as plain text with clear sections for each day:
+        Return ONLY a valid JSON object with this exact structure:
+        {{
+          "destination": "{destination}",
+          "days": {days},
+          "itinerary": [
+            {{
+              "day": 1,
+              "title": "Day theme/title",
+              "morning": {{
+                "activities": ["Activity 1", "Activity 2"],
+                "location": "Main area/neighborhood"
+              }},
+              "afternoon": {{
+                "activities": ["Activity 1", "Activity 2"],
+                "location": "Main area/neighborhood"
+              }},
+              "evening": {{
+                "activities": ["Activity 1", "Activity 2"],
+                "location": "Main area/neighborhood"
+              }},
+              "meals": {{
+                "breakfast": "Restaurant name and dish",
+                "lunch": "Restaurant name and dish",
+                "dinner": "Restaurant name and dish"
+              }}
+            }}
+          ]
+        }}
 
-        Day 1: [Title]
-        Morning: [activities]
-        Afternoon: [activities]
-        Evening: [activities]
-        Meals: Breakfast at [place], Lunch at [place], Dinner at [place]
-
-        Day 2: [Title]
-        ...
-
-        Make it realistic, interesting, and easy to read.
+        Make it realistic, interesting, and include specific place names.
+        Return ONLY valid JSON, no markdown, no other text.
         """
 
         response = self.llm.invoke(prompt)
-        print(response.content)
-        state["itinerary"] = response.content
+        content = response.content.strip()
+
+        # Try to extract JSON from markdown code blocks if present
+        if "```json" in content:
+            content = content.split("```json")[1].split("```")[0].strip()
+        elif "```" in content:
+            content = content.split("```")[1].split("```")[0].strip()
+
+        try:
+            # Validate it's proper JSON
+            structured_data = json.loads(content)
+            validated_itinerary = StructuredItinerary(**structured_data)
+
+            # Store the structured data as JSON string
+            state["structured_itinerary"] = validated_itinerary.model_dump()
+            # Return JSON string for A2A communication
+            state["itinerary"] = json.dumps(validated_itinerary.model_dump(), indent=2)
+
+            print("✅ Successfully created structured itinerary")
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON parsing error: {e}")
+            print(f"Content: {content}")
+            # Fallback - return error info
+            state["itinerary"] = json.dumps({
+                "error": "Failed to generate structured itinerary",
+                "raw_content": content[:200]
+            })
+            state["structured_itinerary"] = None
+        except Exception as e:
+            print(f"❌ Validation error: {e}")
+            # Fallback
+            state["itinerary"] = json.dumps({
+                "error": f"Validation failed: {str(e)}"
+            })
+            state["structured_itinerary"] = None
 
         return state
 

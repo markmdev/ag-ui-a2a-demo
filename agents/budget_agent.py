@@ -7,8 +7,10 @@ It exposes an A2A Protocol endpoint so it can be called by the orchestrator.
 
 import uvicorn
 import os
-from typing import Any, AsyncIterable
+import json
+from typing import Any, AsyncIterable, List
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
 
 load_dotenv()
 
@@ -32,6 +34,22 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.artifacts import InMemoryArtifactService
 from google.genai import types
+
+
+# Pydantic models for structured budget output
+class BudgetCategory(BaseModel):
+    """Structured data for a budget category."""
+    category: str = Field(description="Budget category name (e.g., Accommodation, Food)")
+    amount: float = Field(description="Amount in USD")
+    percentage: float = Field(description="Percentage of total budget")
+
+
+class StructuredBudget(BaseModel):
+    """Complete structured budget output."""
+    totalBudget: float = Field(description="Total budget in USD")
+    currency: str = Field(default="USD", description="Currency code")
+    breakdown: List[BudgetCategory] = Field(description="Budget breakdown by category")
+    notes: str = Field(description="Additional notes about the budget estimate")
 
 
 class BudgetAgent:
@@ -71,19 +89,41 @@ class BudgetAgent:
 You are a travel budget planning agent. Your role is to estimate realistic travel budgets based on user requests.
 
 When you receive a travel request, analyze the destination, duration, and any other details provided.
-Then create a detailed budget breakdown in plain text format:
+Then create a detailed budget breakdown in JSON format.
 
-TOTAL BUDGET: $X,XXX USD (per person / total)
-
-BREAKDOWN:
-- Accommodation: $X,XXX (XX%)
-- Food & Dining: $X,XXX (XX%)
-- Transportation: $X,XXX (XX%)
-- Activities & Attractions: $X,XXX (XX%)
-- Miscellaneous: $X,XXX (XX%)
-
-NOTES:
-[Brief explanation of the budget estimate, including any assumptions made]
+Return ONLY a valid JSON object with this exact structure:
+{
+  "totalBudget": 5000.00,
+  "currency": "USD",
+  "breakdown": [
+    {
+      "category": "Accommodation",
+      "amount": 1500.00,
+      "percentage": 30.0
+    },
+    {
+      "category": "Food & Dining",
+      "amount": 1000.00,
+      "percentage": 20.0
+    },
+    {
+      "category": "Transportation",
+      "amount": 800.00,
+      "percentage": 16.0
+    },
+    {
+      "category": "Activities & Attractions",
+      "amount": 1200.00,
+      "percentage": 24.0
+    },
+    {
+      "category": "Miscellaneous",
+      "amount": 500.00,
+      "percentage": 10.0
+    }
+  ],
+  "notes": "Budget estimate based on mid-range travel for one person. Prices reflect average costs in the destination."
+}
 
 Make realistic estimates based on:
 - The destination (cost of living in that location)
@@ -91,6 +131,8 @@ Make realistic estimates based on:
 - Type of travel (budget, mid-range, luxury if specified)
 - Number of people if mentioned
 - Any specific activities or requirements mentioned
+
+Return ONLY valid JSON, no markdown code blocks, no other text.
             """,
             tools=[],  # No tools needed for this agent currently
         )
@@ -135,20 +177,52 @@ Make realistic estimates based on:
         ):
             # Check if this is the final response
             if event.is_final_response():
-                response = ''
+                response_text = ''
                 if (
                     event.content
                     and event.content.parts
                     and event.content.parts[0].text
                 ):
                     # Extract text from all parts
-                    response = '\n'.join(
+                    response_text = '\n'.join(
                         [p.text for p in event.content.parts if p.text]
                     )
 
+                # Try to parse and validate JSON response
+                content_str = response_text.strip()
+
+                # Try to extract JSON from markdown code blocks if present
+                if "```json" in content_str:
+                    content_str = content_str.split("```json")[1].split("```")[0].strip()
+                elif "```" in content_str:
+                    content_str = content_str.split("```")[1].split("```")[0].strip()
+
+                try:
+                    # Validate it's proper JSON
+                    structured_data = json.loads(content_str)
+                    validated_budget = StructuredBudget(**structured_data)
+
+                    # Return JSON string
+                    final_response = json.dumps(validated_budget.model_dump(), indent=2)
+                    print("✅ Successfully created structured budget")
+                except json.JSONDecodeError as e:
+                    print(f"❌ JSON parsing error: {e}")
+                    print(f"Content: {content_str}")
+                    # Fallback
+                    final_response = json.dumps({
+                        "error": "Failed to generate structured budget",
+                        "raw_content": content_str[:200]
+                    })
+                except Exception as e:
+                    print(f"❌ Validation error: {e}")
+                    # Fallback
+                    final_response = json.dumps({
+                        "error": f"Validation failed: {str(e)}"
+                    })
+
                 yield {
                     'is_task_complete': True,
-                    'content': response,
+                    'content': final_response,
                 }
             else:
                 # Intermediate processing event

@@ -33,7 +33,7 @@ orchestrator_agent = LlmAgent(
 
     1. Receive travel planning requests from users
     2. Delegate subtasks to specialized agents (Itinerary Agent, Budget Agent) ONE AT A TIME
-    3. Wait for responses from those agents
+    3. Wait for responses from those agents (they will return structured JSON data)
     4. Synthesize the information you receive
     5. Present a comprehensive final response to the user
 
@@ -44,10 +44,15 @@ orchestrator_agent = LlmAgent(
 
     WORKFLOW FOR TRAVEL PLANNING:
     1. First, contact the Itinerary Agent to create the day-by-day itinerary
-    2. Wait for the itinerary response
-    3. Then, contact the Budget Agent to estimate costs (pass the itinerary details if helpful)
-    4. Wait for the budget response
-    5. Finally, present BOTH the itinerary and budget together in your response to the user
+    2. Wait for the itinerary response (it will be in JSON format)
+    3. Then, contact the Budget Agent to estimate costs (pass the destination and trip duration)
+    4. Wait for the budget response (it will be in JSON format)
+    5. Finally, present BOTH the itinerary and budget together in a clear, user-friendly format
+
+    AGENT RESPONSE FORMAT:
+    - The Itinerary Agent returns structured JSON with: destination, days, and a detailed itinerary array
+    - The Budget Agent returns structured JSON with: totalBudget, currency, breakdown by category, and notes
+    - You should acknowledge receiving the data and present it to the user in a readable format
 
     IMPORTANT: After you receive ALL responses from the agents via tool results, you MUST
     create a final message that presents the complete information to the user. Do not just call

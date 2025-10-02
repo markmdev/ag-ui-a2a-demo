@@ -19,8 +19,7 @@ export default function Home() {
 
         {/* Chat Component */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          {/* <TravelChat /> */}
-          <A2AChat />
+          <TravelChat />
         </div>
 
         {/* Agent Legend */}
