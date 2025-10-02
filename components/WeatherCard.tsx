@@ -44,28 +44,28 @@ const getWeatherIcon = (condition: string): string => {
 };
 
 /**
- * Get condition color styling
+ * Get condition color styling using CopilotCloud Palette
  */
 const getConditionStyle = (condition: string) => {
   const cond = condition.toLowerCase();
   if (cond.includes("sun") || cond.includes("clear"))
-    return "bg-yellow-50 border-yellow-200 text-yellow-800";
-  if (cond.includes("cloud")) return "bg-gray-50 border-gray-200 text-gray-800";
+    return "bg-[#FFF388]/20 border-[#FFF388] text-[#010507]";
+  if (cond.includes("cloud")) return "bg-[#C9C9DA]/20 border-[#C9C9DA] text-[#010507]";
   if (cond.includes("rain") || cond.includes("storm"))
-    return "bg-blue-50 border-blue-300 text-blue-800";
-  return "bg-sky-50 border-sky-200 text-sky-800";
+    return "bg-[#BEC2FF]/20 border-[#BEC2FF] text-[#010507]";
+  return "bg-[#85E0CE]/20 border-[#85E0CE] text-[#010507]";
 };
 
 export const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-sky-100 rounded-xl p-4 my-3 border border-blue-200 shadow-lg animate-fade-in-up">
+    <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 my-3 border-2 border-[#DBDBE5] shadow-elevation-md animate-fade-in-up">
       {/* Header */}
       <div className="mb-3">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🌤️</span>
-          <h2 className="text-xl font-bold text-blue-900">{data.destination} Weather</h2>
+          <h2 className="text-xl font-semibold text-[#010507]">{data.destination} Weather</h2>
         </div>
-        <p className="text-blue-700 text-xs">{data.forecast.length}-day forecast</p>
+        <p className="text-[#57575B] text-xs">{data.forecast.length}-day forecast</p>
       </div>
 
       {/* Forecast Days */}
@@ -75,13 +75,13 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
           return (
             <div
               key={index}
-              className={`bg-white rounded-lg p-2 shadow-sm border ${
-                isBestDay ? "border-green-300 ring-2 ring-green-200" : "border-blue-100"
+              className={`bg-white/80 backdrop-blur-sm rounded-lg p-2 shadow-elevation-sm border ${
+                isBestDay ? "border-[#85E0CE] ring-2 ring-[#85E0CE]/30" : "border-[#E9E9EF]"
               } relative`}
             >
               {/* Best Day Badge */}
               {isBestDay && (
-                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                <div className="absolute -top-2 -right-2 bg-[#1B936F] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
                   BEST
                 </div>
               )}
@@ -89,10 +89,10 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
               {/* Day Header */}
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-1">
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white font-bold text-[10px]">
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[#BEC2FF] text-white font-bold text-[10px]">
                     {day.day}
                   </div>
-                  <span className="text-[10px] font-semibold text-gray-600">{day.date}</span>
+                  <span className="text-[10px] font-semibold text-[#57575B]">{day.date}</span>
                 </div>
                 <span className="text-xl">{getWeatherIcon(day.condition)}</span>
               </div>
@@ -108,25 +108,25 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
 
               {/* Temperature */}
               <div className="flex items-center justify-center gap-2 mb-1">
-                <span className="text-lg font-bold text-gray-900">{day.highTemp}°</span>
-                <span className="text-xs text-gray-500">{day.lowTemp}°</span>
+                <span className="text-lg font-bold text-[#010507]">{day.highTemp}°</span>
+                <span className="text-xs text-[#838389]">{day.lowTemp}°</span>
               </div>
 
               {/* Weather Stats */}
               <div className="space-y-0.5">
-                <div className="flex items-center justify-between text-[9px] text-gray-600">
+                <div className="flex items-center justify-between text-[9px] text-[#57575B]">
                   <span>💧 {day.precipitation}%</span>
                   <span>💨 {day.windSpeed}mph</span>
                 </div>
-                <div className="text-[9px] text-gray-600 text-center">
+                <div className="text-[9px] text-[#57575B] text-center">
                   Humidity {day.humidity}%
                 </div>
               </div>
 
               {/* Description */}
               {day.description && (
-                <div className="mt-1 pt-1 border-t border-gray-100">
-                  <p className="text-[9px] text-gray-600 line-clamp-2">{day.description}</p>
+                <div className="mt-1 pt-1 border-t border-[#E9E9EF]">
+                  <p className="text-[9px] text-[#57575B] line-clamp-2">{day.description}</p>
                 </div>
               )}
             </div>
@@ -136,21 +136,21 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ data }) => {
 
       {/* Travel Advice */}
       {data.travelAdvice && (
-        <div className="bg-white rounded-lg p-3 border border-blue-100">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-[#DBDBE5] shadow-elevation-sm">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm">💼</span>
-            <h3 className="text-sm font-bold text-gray-900">Travel Advice</h3>
+            <h3 className="text-sm font-semibold text-[#010507]">Travel Advice</h3>
           </div>
-          <p className="text-xs text-gray-700 leading-relaxed">{data.travelAdvice}</p>
+          <p className="text-xs text-[#57575B] leading-relaxed">{data.travelAdvice}</p>
         </div>
       )}
 
       {/* Best Days Highlight */}
       {data.bestDays && data.bestDays.length > 0 && (
-        <div className="mt-2 bg-green-50 border border-green-200 rounded-lg p-2">
+        <div className="mt-2 bg-[#85E0CE]/20 border border-[#85E0CE] rounded-lg p-2">
           <div className="flex items-center gap-1">
             <span className="text-xs">✨</span>
-            <span className="text-xs font-semibold text-green-800">
+            <span className="text-xs font-semibold text-[#010507]">
               Best days for outdoor activities: Day {data.bestDays.join(", Day ")}
             </span>
           </div>
