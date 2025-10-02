@@ -7,8 +7,9 @@ import { useCopilotAction } from "@copilotkit/react-core";
 import type { ActionRenderProps } from "@copilotkit/react-core";
 import "@copilotkit/react-ui/styles.css";
 import "./style.css";
-import { type ItineraryData } from "./ItineraryCard";
+import { type ItineraryData, type RestaurantData } from "./ItineraryCard";
 import { type BudgetData } from "./BudgetBreakdown";
+import { WeatherCard, type WeatherData } from "./WeatherCard";
 
 /**
  * Travel Chat Component
@@ -23,6 +24,8 @@ import { type BudgetData } from "./BudgetBreakdown";
 interface TravelChatProps {
   onItineraryUpdate?: (data: ItineraryData | null) => void;
   onBudgetUpdate?: (data: BudgetData | null) => void;
+  onWeatherUpdate?: (data: WeatherData | null) => void;
+  onRestaurantUpdate?: (data: RestaurantData | null) => void;
 }
 
 // Type for the send_message_to_a2a_agent action parameters
@@ -88,6 +91,26 @@ const MessageToA2A = ({ status, args }: MessageActionRenderProps) => {
         framework: "ADK",
       };
     }
+    if (agentName.toLowerCase().includes("weather")) {
+      // Google ADK - Blue/Weather branding
+      return {
+        bgColor: "bg-gradient-to-r from-blue-100 to-sky-100",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-400",
+        icon: "✨",
+        framework: "ADK",
+      };
+    }
+    if (agentName.toLowerCase().includes("restaurant")) {
+      // Google ADK - Blue branding
+      return {
+        bgColor: "bg-gradient-to-r from-blue-100 to-sky-100",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-400",
+        icon: "✨",
+        framework: "ADK",
+      };
+    }
     return {
       bgColor: "bg-gray-100",
       textColor: "text-gray-700",
@@ -98,7 +121,7 @@ const MessageToA2A = ({ status, args }: MessageActionRenderProps) => {
   };
 
   // Truncate long task descriptions
-  const truncateTask = (task: string, maxLength: number = 80) => {
+  const truncateTask = (task: string, maxLength: number = 50) => {
     if (task.length <= maxLength) return task;
     return task.substring(0, maxLength) + "...";
   };
@@ -171,6 +194,26 @@ const MessageFromA2A = ({ status, args }: MessageActionRenderProps) => {
         framework: "ADK",
       };
     }
+    if (agentName.toLowerCase().includes("weather")) {
+      // Google ADK - Blue/Weather branding
+      return {
+        bgColor: "bg-gradient-to-r from-blue-100 to-sky-100",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-400",
+        icon: "✨",
+        framework: "ADK",
+      };
+    }
+    if (agentName.toLowerCase().includes("restaurant")) {
+      // Google ADK - Blue branding
+      return {
+        bgColor: "bg-gradient-to-r from-blue-100 to-sky-100",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-400",
+        icon: "✨",
+        framework: "ADK",
+      };
+    }
     return {
       bgColor: "bg-gray-100",
       textColor: "text-gray-700",
@@ -217,8 +260,11 @@ const MessageFromA2A = ({ status, args }: MessageActionRenderProps) => {
 /**
  * Inner chat component that uses CopilotKit hooks
  */
-const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
-  const [approvalStates, setApprovalStates] = useState<Record<string, { approved: boolean; rejected: boolean }>>({});
+const ChatInner = ({ onItineraryUpdate, onBudgetUpdate, onWeatherUpdate, onRestaurantUpdate }: TravelChatProps) => {
+  const [approvalStates, setApprovalStates] = useState<
+    Record<string, { approved: boolean; rejected: boolean }>
+  >({});
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const { visibleMessages } = useCopilotChat();
 
   // Extract structured data from messages and pass to parent
@@ -276,6 +322,14 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
                 } else {
                   console.log("⏳ DEBUG: Budget not approved yet, skipping update");
                 }
+              } else if (parsed.destination && parsed.forecast && Array.isArray(parsed.forecast)) {
+                console.log("✅ DEBUG: Found weather data, updating parent and local state");
+                const weatherDataParsed = parsed as WeatherData;
+                setWeatherData(weatherDataParsed);
+                onWeatherUpdate?.(weatherDataParsed);
+              } else if (parsed.destination && parsed.meals && Array.isArray(parsed.meals)) {
+                console.log("✅ DEBUG: Found restaurant data, updating parent");
+                onRestaurantUpdate?.(parsed as RestaurantData);
               }
             }
           } catch (e) {
@@ -286,7 +340,7 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
     };
 
     extractDataFromMessages();
-  }, [visibleMessages, approvalStates, onItineraryUpdate, onBudgetUpdate]);
+  }, [visibleMessages, approvalStates, onItineraryUpdate, onBudgetUpdate, onWeatherUpdate, onRestaurantUpdate]);
 
   // Register the action renderer for A2A messages
   // This is called automatically by the A2A middleware when agents communicate
@@ -467,6 +521,48 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
     [approvalStates]
   );
 
+  // Register generative UI for Weather Agent responses
+  // This displays the WeatherCard inline in the chat when weather data is received
+  useCopilotAction({
+    name: "display_weather_forecast",
+    description: "Display weather forecast data as generative UI in the chat",
+    available: "frontend",
+    parameters: [
+      {
+        name: "weatherData",
+        type: "object",
+        description: "Weather forecast data to display",
+      },
+    ],
+    render: ({ args }) => {
+      // Validate weather data exists and has required fields
+      if (!args.weatherData || typeof args.weatherData !== "object") {
+        return null;
+      }
+
+      const weather = args.weatherData as WeatherData;
+
+      // Validate weather has required fields
+      if (!weather.destination || !weather.forecast || !Array.isArray(weather.forecast)) {
+        return null;
+      }
+
+      return (
+        <div className="my-3">
+          <WeatherCard data={weather} />
+        </div>
+      );
+    },
+  });
+
+  // Auto-display weather when weatherData state is populated
+  // This creates the generative UI display
+  useEffect(() => {
+    if (weatherData) {
+      console.log("🌤️ DEBUG: Weather data available for generative UI display");
+    }
+  }, [weatherData]);
+
   return (
     <div className="h-full">
       <CopilotChat
@@ -485,10 +581,15 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
  * Main Travel Chat Component
  * Wraps the chat in CopilotKit provider
  */
-export default function TravelChat({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) {
+export default function TravelChat({ onItineraryUpdate, onBudgetUpdate, onWeatherUpdate, onRestaurantUpdate }: TravelChatProps) {
   return (
     <CopilotKit runtimeUrl="/api/copilotkit" showDevConsole={false} agent="a2a_chat">
-      <ChatInner onItineraryUpdate={onItineraryUpdate} onBudgetUpdate={onBudgetUpdate} />
+      <ChatInner
+        onItineraryUpdate={onItineraryUpdate}
+        onBudgetUpdate={onBudgetUpdate}
+        onWeatherUpdate={onWeatherUpdate}
+        onRestaurantUpdate={onRestaurantUpdate}
+      />
     </CopilotKit>
   );
 }

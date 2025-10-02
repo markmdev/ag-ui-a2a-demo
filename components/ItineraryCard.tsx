@@ -34,11 +34,38 @@ export interface ItineraryData {
   itinerary: DayItinerary[];
 }
 
-interface ItineraryCardProps {
-  data: ItineraryData;
+// Restaurant data structure for day-by-day meals
+export interface RestaurantData {
+  destination: string;
+  days: number;
+  meals: Array<{
+    day: number;
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+  }>;
 }
 
-export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data }) => {
+interface ItineraryCardProps {
+  data: ItineraryData;
+  restaurantData?: RestaurantData | null; // Optional restaurant data to populate meals
+}
+
+export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantData }) => {
+  // Get meals for a specific day from restaurant data
+  const getMealsForDay = (dayNumber: number): Meals | null => {
+    if (!restaurantData) return null;
+
+    const dayMeals = restaurantData.meals.find((m) => m.day === dayNumber);
+    if (!dayMeals) return null;
+
+    return {
+      breakfast: dayMeals.breakfast,
+      lunch: dayMeals.lunch,
+      dinner: dayMeals.dinner,
+    };
+  };
+
   return (
     <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 my-3 border border-purple-200 shadow-lg animate-fade-in-up">
       {/* Header */}
@@ -54,20 +81,26 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data }) => {
 
       {/* Days */}
       <div className="space-y-3">
-        {data.itinerary.map((day, index) => (
-          <div key={index} className="bg-white rounded-lg p-3 shadow-md border border-purple-100">
-            {/* Day Header */}
-            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-purple-100">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white font-bold text-sm">
-                {day.day}
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">{day.title}</h3>
-            </div>
+        {data.itinerary.map((day, index) => {
+          // Try to get restaurant meals for this day
+          const restaurantMeals = getMealsForDay(day.day);
+          // Use restaurant meals if available, otherwise use original itinerary meals
+          const mealsToDisplay = restaurantMeals || day.meals;
 
-            {/* Time Slots and Meals Side-by-Side */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-              {/* Time Slots - Takes 2 columns */}
-              <div className="lg:col-span-2 space-y-2">
+          return (
+            <div key={index} className="bg-white rounded-lg p-3 shadow-md border border-purple-100">
+              {/* Day Header */}
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-purple-100">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white font-bold text-sm">
+                  {day.day}
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">{day.title}</h3>
+              </div>
+
+              {/* Time Slots and Meals Side-by-Side */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                {/* Time Slots - Takes 2 columns */}
+                <div className="lg:col-span-2 space-y-2">
                 <div className="flex items-center gap-1 mb-1">
                   <span className="text-sm">📅</span>
                   <h4 className="text-sm font-semibold text-gray-800">Day Itinerary</h4>
@@ -100,23 +133,46 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data }) => {
                 />
               </div>
 
-              {/* Meals - Takes 1 column */}
-              <div className="lg:col-span-1 flex flex-col">
-                <div className="lg:border-l lg:border-gray-100 lg:pl-2 flex flex-col h-full">
-                  <div className="flex items-center gap-1 mb-1">
-                    <span className="text-sm">🍽️</span>
-                    <h4 className="text-sm font-semibold text-gray-800">Meals</h4>
-                  </div>
-                  <div className="flex flex-col justify-between flex-1 space-y-1">
-                    <MealItem icon="🥐" label="Breakfast" meal={day.meals.breakfast} />
-                    <MealItem icon="🍜" label="Lunch" meal={day.meals.lunch} />
-                    <MealItem icon="🍷" label="Dinner" meal={day.meals.dinner} />
+                {/* Meals - Takes 1 column */}
+                <div className="lg:col-span-1 flex flex-col">
+                  <div className="lg:border-l lg:border-gray-100 lg:pl-2 flex flex-col h-full">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-sm">🍽️</span>
+                      <h4 className="text-sm font-semibold text-gray-800">Meals</h4>
+                      {!restaurantMeals && (
+                        <span className="ml-auto text-[9px] text-blue-600 font-medium animate-pulse">
+                          Loading...
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col justify-between flex-1 space-y-1">
+                      {restaurantMeals ? (
+                        <>
+                          <MealItem icon="🥐" label="Breakfast" meal={mealsToDisplay.breakfast} />
+                          <MealItem icon="🍜" label="Lunch" meal={mealsToDisplay.lunch} />
+                          <MealItem icon="🍷" label="Dinner" meal={mealsToDisplay.dinner} />
+                        </>
+                      ) : (
+                        // Show placeholder while waiting for restaurant data
+                        <>
+                          <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
+                            <span className="text-[10px] text-gray-400">Awaiting recommendations...</span>
+                          </div>
+                          <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
+                            <span className="text-[10px] text-gray-400">Awaiting recommendations...</span>
+                          </div>
+                          <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
+                            <span className="text-[10px] text-gray-400">Awaiting recommendations...</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

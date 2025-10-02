@@ -20,16 +20,16 @@ import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
   // A2A agent URLs (the specialized agents using A2A Protocol)
+  // LangGraph Agent
   const itineraryAgentUrl = process.env.ITINERARY_AGENT_URL || "http://localhost:9001";
+
+  // ADK Agents (Python + Gemini)
   const budgetAgentUrl = process.env.BUDGET_AGENT_URL || "http://localhost:9002";
+  const restaurantAgentUrl = process.env.RESTAURANT_AGENT_URL || "http://localhost:9003";
+  const weatherAgentUrl = process.env.WEATHER_AGENT_URL || "http://localhost:9005";
 
   // Orchestrator agent URL (ADK agent using AG-UI Protocol)
   const orchestratorUrl = process.env.ORCHESTRATOR_URL || "http://localhost:9000";
-
-  // const buildings_management_agent_url =
-  //   process.env.buildings_management || "http://localhost:9001";
-  // const finance_url = process.env.finance || "http://localhost:9002";
-  // const it_url = process.env.it || "http://localhost:9003";
 
   // Create an HttpAgent that wraps the orchestrator
   // This agent speaks AG-UI Protocol
@@ -41,34 +41,52 @@ export async function POST(request: NextRequest) {
   // This agent wraps the orchestrator and connects it to the A2A agents
   // It automatically adds the send_message_to_a2a_agent tool to the orchestrator
   const a2aMiddlewareAgent = new A2AMiddlewareAgent({
-    description: "Travel planning assistant with itinerary and budget agents",
+    description: "Travel planning assistant with 4 specialized agents: Itinerary (LangGraph), Weather, Restaurant, and Budget (ADK)",
     // The A2A agent URLs (speak A2A Protocol)
-    agentUrls: [itineraryAgentUrl, budgetAgentUrl],
-    // agentUrls: [buildings_management_agent_url, finance_url, it_url],
+    // Register 4 agents: 1 LangGraph + 3 ADK
+    agentUrls: [
+      // LangGraph agent
+      itineraryAgentUrl,
+      // ADK agents
+      budgetAgentUrl,
+      restaurantAgentUrl,
+      weatherAgentUrl,
+    ],
     // The orchestrator agent (speaks AG-UI Protocol)
     orchestrationAgent,
     // Simple domain-specific instructions only
     // The middleware adds comprehensive routing instructions automatically
     instructions: `
-      You are a travel planning assistant that orchestrates between specialized agents.
+      You are a travel planning assistant that orchestrates between 4 specialized agents.
 
-      Workflow (SEQUENTIAL - ONE STEP AT A TIME):
-      1. Contact the Itinerary Agent to create the day-by-day itinerary
-      2. Wait for the itinerary response (it will be JSON)
-      3. Contact the Budget Agent to estimate costs. Pass the response from Itinerary Agent
-      4. Wait for the budget response (it will be JSON)
-      5. **IMPORTANT**: Use the 'request_budget_approval' tool to get user approval for the budget
-      6. Wait for user's approval/rejection
-      7. If approved: Present the complete travel plan to the user
-      8. If rejected: Inform the user and offer to adjust the plan
+      AVAILABLE AGENTS:
+
+      - Itinerary Agent (LangGraph): Creates day-by-day travel itineraries with activities
+      - Weather Agent (ADK): Provides weather forecasts and packing advice
+      - Restaurant Agent (ADK): Recommends breakfast, lunch, dinner for each day
+      - Budget Agent (ADK): Estimates travel costs and creates budget breakdowns
+
+      WORKFLOW STRATEGY (SEQUENTIAL - ONE AT A TIME):
+
+      1. Itinerary Agent - Create the base itinerary (meals will be empty initially)
+      2. Weather Agent - Get forecast to inform planning
+      3. Restaurant Agent - Get day-by-day meal recommendations (pass destination + number of days)
+      4. Budget Agent - Create cost estimate
+      5. **IMPORTANT**: Use 'request_budget_approval' tool for budget approval
+      6. Present complete plan to user
 
       CRITICAL RULES:
       - Call agents ONE AT A TIME - never make multiple tool calls simultaneously
       - After making a tool call, WAIT for the result before making the next call
-      - You MUST provide the Budget Agent with the response from the Itinerary Agent
-      - You MUST call 'request_budget_approval' after receiving the budget from the Budget Agent
-      - After receiving user approval, you MUST present a complete summary to the user
-      - Do not end the conversation without presenting all the results you gathered
+      - Pass context from earlier agents to later ones (especially destination and days to Restaurant Agent)
+      - You MUST call 'request_budget_approval' after receiving the budget
+      - After receiving approval, present a complete summary to the user
+
+      RESTAURANT AGENT SPECIFICS:
+      - Must pass the destination and number of days from the itinerary
+      - Request day-by-day meal recommendations (breakfast, lunch, dinner)
+      - The Restaurant Agent will return meals matching the itinerary days
+      - These meals will populate the itinerary display
 
       Human-in-the-Loop (HITL):
       - Always request budget approval using the 'request_budget_approval' tool
@@ -76,8 +94,9 @@ export async function POST(request: NextRequest) {
       - Wait for the user's decision before proceeding
 
       Additional Rules:
-      - Once you have received information from an agent, do not call that agent again for the same information
-      - Always provide a final response that presents ALL the gathered information to the user
+      - Once you have received information from an agent, do not call that agent again
+      - Each agent returns structured JSON - acknowledge and build on the information
+      - Always provide a final response that synthesizes ALL gathered information
     `,
     // instructions: `
     //     You are an HR agent. You are responsible for hiring employees and other typical HR tasks.

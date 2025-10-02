@@ -1,49 +1,66 @@
-# 🌍 AG-UI + A2A Communication Demo
+# 🌍 AG-UI + A2A Multi-Agent Communication Demo
 
-A demonstration of **Agent-to-Agent (A2A) communication** between different AI agent frameworks using the **AG-UI Protocol** and **A2A Middleware**.
+A comprehensive demonstration of **Agent-to-Agent (A2A) communication** between different AI agent frameworks using the **AG-UI Protocol** and **A2A Middleware**.
 
 ## 🎯 What This Demonstrates
 
-This demo showcases how agents built with **different frameworks** can seamlessly communicate via the A2A protocol:
+This demo showcases how **4 specialized agents** built with **different frameworks** seamlessly communicate via the A2A protocol:
 
-- **🧭 Orchestrator Agent**: Google ADK with Gemini 2.0 (Python) - Uses AG-UI Protocol
-- **🗺️ Itinerary Agent**: LangGraph with OpenAI (Python) - Uses A2A Protocol
-- **💰 Budget Agent**: Google ADK with Gemini 2.0 (Python) - Uses A2A Protocol
+### 🔗 LangGraph Agents (Python + OpenAI)
+- **🗺️ Itinerary Agent** (Port 9001) - Creates day-by-day travel itineraries with activities
+
+### ✨ ADK Agents (Python + Gemini)
+- **💰 Budget Agent** (Port 9002) - Estimates travel costs and creates budget breakdowns
+- **🍽️ Restaurant Agent** (Port 9003) - Recommends day-by-day meal plans (breakfast, lunch, dinner)
+- **🌤️ Weather Agent** (Port 9005) - Provides weather forecasts and travel advice
+
+### 🧭 Orchestrator
+- **Orchestrator Agent** (Port 9000) - ADK with Gemini 2.5 Pro - Coordinates all agents via A2A middleware
 
 ### Key Features
 
-✅ **A2A Protocol**: Real agent-to-agent communication across frameworks
-✅ **Visual Message Flow**: See agents communicate in real-time with color-coded messages
-✅ **Multi-Framework**: ADK ↔ LangGraph via A2A
-✅ **Structured Data**: JSON responses for beautiful UI rendering
+✅ **4 Specialized Agents**: Travel planning with coordinated multi-agent workflow
+✅ **Multi-Framework**: 1 LangGraph + 3 ADK agents working together via A2A
+✅ **Orchestrator-Mediated**: Full UI visibility of all agent-to-agent communication
+✅ **A2A Protocol**: Real inter-agent communication with sequential coordination
+✅ **Structured JSON**: All agents return validated structured data
+✅ **Generative UI**: Weather forecasts and meal recommendations display as rich UI components
+✅ **Progressive Reveal**: Itinerary → Weather → Meals → Budget workflow
+✅ **Visual Message Flow**: See each agent interaction in real-time with color-coded messages
 ✅ **AG-UI Protocol**: Standardized agent-UI communication
+✅ **Human-in-the-Loop**: Budget approval workflow demonstrates HITL patterns
 ✅ **Production-Ready Code**: Well-documented for engineers learning A2A patterns
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│ Next.js UI (CopilotKit)                │
-│ - A2A message visualization             │
-│ - Interactive chat interface            │
-└────────────┬────────────────────────────┘
-             │ AG-UI Protocol (HTTP)
-┌────────────┴────────────────────────────┐
-│ A2A Middleware (@ag-ui/a2a-middleware)  │
-│ - Wraps orchestrator                    │
-│ - Routes A2A messages                   │
-│ - Adds send_message_to_a2a_agent tool   │
-└────────┬─────────────────┬──────────────┘
-         │ A2A Protocol    │ A2A Protocol
-┌────────┴────────┐ ┌─────┴──────────────┐
-│ Itinerary Agent │ │ Budget Agent       │
-│ (LangGraph)     │ │ (ADK/Gemini)       │
-│ Port 9001       │ │ Port 9002          │
-└─────────────────┘ └────────────────────┘
-         ↑
-         │ AG-UI Protocol
-┌────────┴────────┐
-│ Orchestrator    │
+┌──────────────────────────────────────────────────────┐
+│ Next.js UI (CopilotKit)                             │
+│ - Multi-agent message visualization                 │
+│ - Interactive chat interface                         │
+│ - Generative UI (weather, itinerary, budget)         │
+└────────────────┬─────────────────────────────────────┘
+                 │ AG-UI Protocol (HTTP)
+┌────────────────┴─────────────────────────────────────┐
+│ A2A Middleware (@ag-ui/a2a-middleware)               │
+│ - Wraps orchestrator with 4 A2A agents               │
+│ - Routes messages sequentially                       │
+│ - Adds send_message_to_a2a_agent tool                │
+└──────┬───────────────────────────────────────────────┘
+       │ A2A Protocol (sequential calls)
+       │
+       ├─────────► LangGraph Agent (Python + OpenAI)
+       │           └── Itinerary (9001)
+       │
+       └─────────► ADK Agents (Python + Gemini)
+                   ├── Weather (9005)
+                   ├── Restaurant (9003)
+                   └── Budget (9002)
+       ▲
+       │ AG-UI Protocol
+       │
+┌──────┴──────────┐
+│ Orchestrator    │  ← Coordinates all agent communication
 │ (ADK/Gemini)    │
 │ Port 9000       │
 └─────────────────┘
@@ -93,13 +110,27 @@ Required keys:
 npm run dev
 ```
 
-This will start:
-- 🌐 **Next.js UI** on `http://localhost:3000`
-- 🧭 **Orchestrator Agent** on `http://localhost:9000` (ADK + AG-UI)
-- 🗺️ **Itinerary Agent** on `http://localhost:9001` (LangGraph + A2A)
-- 💰 **Budget Agent** on `http://localhost:9002` (ADK + A2A)
+This will start all 6 services in one terminal with **color-coded output**:
 
-All in one terminal with color-coded output! 🎉
+**Frontend:**
+- 🌐 **UI** (cyan) - Next.js on `http://localhost:3000`
+
+**Orchestrator:**
+- 🧭 **Orch** (gray) - Orchestrator on `http://localhost:9000`
+
+**LangGraph Agent (green):**
+- 🗺️ **Itin** - Itinerary Agent on `http://localhost:9001`
+
+**ADK Agents (blue):**
+- 🌤️ **Weather** - Weather Agent on `http://localhost:9005`
+- 🍽️ **Rest** - Restaurant Agent on `http://localhost:9003`
+- 💰 **Budget** - Budget Agent on `http://localhost:9002`
+
+All running concurrently with color-coded labels! 🎉
+- **Green** = LangGraph agent (Python + OpenAI)
+- **Blue** = ADK agents (Python + Gemini)
+- **Gray** = Orchestrator
+- **Cyan** = UI
 
 > **Note:** The first time you run this, make sure you've installed Python dependencies (step 2)
 
@@ -107,39 +138,66 @@ All in one terminal with color-coded output! 🎉
 
 Ask the AI travel assistant:
 
-- **"Plan a 3-day trip to Tokyo"**
-- **"Create an itinerary for Paris and tell me the budget"**
-- **"I want to visit New York for 5 days"**
+- **"Plan a 3-day trip to Tokyo"** - Watch all 4 agents collaborate!
+- **"Create a comprehensive itinerary for Paris with budget"** - Full multi-agent workflow
+- **"I want to visit New York for 5 days"** - Sequential agent coordination
 
-Watch as:
-1. 🧭 **Orchestrator** receives your request and announces which agents it will contact
-2. 🗺️ **Itinerary Agent** creates a day-by-day plan using LangGraph
-3. 💰 **Budget Agent** estimates costs using ADK/Gemini
-4. 📊 Results displayed in beautiful, interactive UI with A2A message visualization
+### What Happens:
+
+**Standard Workflow** (e.g., "Plan a 3-day trip to Tokyo"):
+1. 🧭 **Orchestrator** analyzes the request and coordinates agent calls
+2. 🗺️ **Itinerary Agent** (LangGraph) creates day-by-day plan with activities
+   - Meals section shows "Loading..." initially
+3. 🌤️ **Weather Agent** (ADK) provides forecast and travel advice
+   - Displays as generative UI in both chat and main panel
+4. 🍽️ **Restaurant Agent** (ADK) recommends day-by-day meals
+   - Breakfast, lunch, dinner for each day
+   - Automatically populates the meals section in the itinerary
+5. 💰 **Budget Agent** (ADK) estimates total costs
+6. ✅ **User Approval** - You approve the budget (Human-in-the-Loop)
+7. 📊 Complete travel plan displayed with weather, itinerary, meals, and budget
+
+**Progressive Reveal:**
+- First, you see the itinerary with empty meals
+- Then weather forecast appears
+- Then meals populate in the itinerary
+- Finally, budget appears and awaits approval
+
+All agent interactions are visible in the UI with color-coded messages!
 
 ## 📁 Project Structure
 
 ```
 ag-ui-adk-demo-v2/
-├── app/                          # Next.js App Router
+├── app/                              # Next.js App Router
 │   ├── api/copilotkit/
-│   │   └── route.ts              # A2A middleware setup ⭐
-│   ├── page.tsx                  # Main page
-│   ├── layout.tsx                # Root layout
-│   └── globals.css               # Styles + animations
+│   │   └── route.ts                  # A2A middleware setup (4 agents) ⭐
+│   ├── page.tsx                      # Main page with 4-agent legend
+│   ├── layout.tsx                    # Root layout
+│   └── globals.css                   # Styles + animations
 ├── components/
-│   └── travel-chat.tsx           # Chat with A2A visualizations ⭐
-├── agents/                       # Python agents
-│   ├── orchestrator.py           # ADK orchestrator (port 9000) ⭐
-│   ├── itinerary_agent.py        # LangGraph agent (port 9001) ⭐
-│   ├── budget_agent.py           # ADK budget agent (port 9002) ⭐
+│   ├── travel-chat.tsx               # Chat with A2A visualizations ⭐
+│   ├── ItineraryCard.tsx             # Structured itinerary display with meals
+│   ├── BudgetBreakdown.tsx           # Structured budget display
+│   └── WeatherCard.tsx               # Weather forecast generative UI ⭐
+├── agents/                           # Python agents (5 total)
+│   ├── orchestrator.py               # ADK orchestrator (9000) ⭐
+│   │
+│   ├── # LangGraph Agent (Python + OpenAI)
+│   ├── itinerary_agent.py            # Itinerary planning (9001) ⭐
+│   │
+│   ├── # ADK Agents (Python + Gemini)
+│   ├── budget_agent.py               # Budget estimation (9002) ⭐
+│   ├── restaurant_agent.py           # Day-by-day meal plans (9003) ⭐
+│   ├── weather_agent.py              # Weather forecasts (9005) ⭐
+│   │
 │   └── requirements.txt
 ├── package.json
 ├── .env.example
 └── README.md
 ```
 
-⭐ = Key files demonstrating A2A communication
+⭐ = Key files demonstrating multi-agent A2A communication
 
 ## 🔧 Key Technologies
 
@@ -198,27 +256,48 @@ The UI shows real-time agent communication:
 
 ### Agents not connecting?
 
-Check that all 3 agents are running:
+Check that all 5 services are running:
 ```bash
-curl http://localhost:9000  # Orchestrator
+# Orchestrator
+curl http://localhost:9000
+
+# LangGraph Agent
 curl http://localhost:9001  # Itinerary
+
+# ADK Agents
 curl http://localhost:9002  # Budget
+curl http://localhost:9003  # Restaurant
+curl http://localhost:9005  # Weather
 ```
 
 ### "GOOGLE_API_KEY not set"?
 
-Make sure `.env` has your Google API key:
+Make sure `.env` has your Google API key for ADK agents:
 ```bash
 export GOOGLE_API_KEY="your-key-here"
+```
+
+### "OPENAI_API_KEY not set"?
+
+Make sure `.env` has your OpenAI key for LangGraph agents:
+```bash
+export OPENAI_API_KEY="your-key-here"
 ```
 
 ### Frontend can't reach agents?
 
 Check that agent URLs in `.env` match where agents are running:
 ```env
+# Orchestrator
 ORCHESTRATOR_URL=http://localhost:9000
+
+# LangGraph Agent
 ITINERARY_AGENT_URL=http://localhost:9001
+
+# ADK Agents
 BUDGET_AGENT_URL=http://localhost:9002
+RESTAURANT_AGENT_URL=http://localhost:9003
+WEATHER_AGENT_URL=http://localhost:9005
 ```
 
 ### Python dependencies issue?
@@ -246,14 +325,27 @@ This demo is designed for engineers learning about:
 - **Multi-Framework Integration**: How ADK and LangGraph can work together
 - **Production Patterns**: Well-documented, clean code for real-world use
 
-## 🤝 Next Steps
+## 🤝 What's Been Demonstrated
 
-Ideas to extend this demo:
-- Add more A2A agents (hotels, flights, activities)
-- Implement Human-in-the-Loop (HITL) components
-- Add more sophisticated LangGraph workflows
-- Create custom UI components for structured data
-- Add agent state management and memory
+This demo showcases:
+- ✅ **4 Specialized Agents**: Focused multi-agent architecture with clear workflows
+- ✅ **Multi-Framework Integration**: 1 LangGraph + 3 ADK agents
+- ✅ **Orchestrator-Mediated A2A**: Full UI visibility of agent communication
+- ✅ **Structured JSON Outputs**: All agents return validated data structures
+- ✅ **Generative UI**: WeatherCard displays as rich UI component in chat and main panel
+- ✅ **Progressive Data Reveal**: Itinerary → Weather → Meals → Budget workflow
+- ✅ **Human-in-the-Loop**: Budget approval workflow
+- ✅ **Sequential Coordination**: Agents called one-at-a-time with context passing
+- ✅ **Production Patterns**: Well-documented, clean code
+
+## 🚀 Ideas to Extend Further
+
+- **Direct Peer-to-Peer**: Enable agents to call each other without orchestrator
+- **Agent Memory**: Add persistent memory across sessions
+- **More UI Components**: Custom visualizations for weather, activities, etc.
+- **Advanced Workflows**: Conditional agent routing based on user preferences
+- **Real API Integration**: Connect to actual travel APIs (Google Places, OpenWeather, etc.)
+- **Multi-User Support**: Session management for multiple concurrent users
 
 ## 📄 License
 
