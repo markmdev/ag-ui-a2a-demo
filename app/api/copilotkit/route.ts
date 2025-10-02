@@ -39,8 +39,7 @@ import {
 import { HttpAgent } from "@ag-ui/client";
 
 // A2A Middleware for connecting orchestrator to A2A agents
-// Note: Using our fixed version that properly handles tool result context
-import { A2AMiddlewareAgent as A2AMiddlewareAgent } from "@/lib/a2a-middleware";
+import { A2AMiddlewareAgent } from "@ag-ui/a2a-middleware";
 
 import { NextRequest } from "next/server";
 
@@ -105,10 +104,10 @@ export async function POST(request: NextRequest) {
     // - Create routing logic for the orchestrator
     // - Inject the send_message_to_a2a_agent tool
     agentUrls: [
-      itineraryAgentUrl,  // LangGraph + OpenAI
+      itineraryAgentUrl, // LangGraph + OpenAI
       restaurantAgentUrl, // ADK + Gemini
-      budgetAgentUrl,     // ADK + Gemini
-      weatherAgentUrl,    // ADK + Gemini
+      budgetAgentUrl, // ADK + Gemini
+      weatherAgentUrl, // ADK + Gemini
     ],
 
     // The orchestrator agent that will coordinate everything
