@@ -4,9 +4,20 @@
  * This is a fixed version of @ag-ui/a2a-middleware that properly updates
  * input.messages with tool results before triggering a new run.
  *
- * Bug fix: Lines 179-196 now collect all tool result messages and add them
- * to input.messages before calling triggerNewRun, ensuring the orchestrator
- * sees the tool results in its context.
+ * THE PROBLEM:
+ * ============
+ * The original middleware would execute tool calls (send messages to A2A agents)
+ * but wouldn't add the tool results back to the message history before triggering
+ * the next orchestrator run. This meant the orchestrator couldn't see the responses
+ * from A2A agents, breaking the workflow.
+ *
+ * THE FIX:
+ * ========
+ * We now collect all tool result messages during execution and explicitly add
+ * them to input.messages before calling triggerNewRun. This ensures the orchestrator
+ * has full context of the A2A agent responses.
+ *
+ * LOCATION: See the "🔧 FIX" comments below around lines 170-196
  */
 
 import {
@@ -156,9 +167,6 @@ export class A2AMiddlewareAgent extends AbstractAgent {
                 const agentName = parsed.agentName;
                 const task = parsed.task;
 
-                if (this.debug) {
-                  console.debug("sending message to a2a agent", { agentName, message: task });
-                }
                 return this.sendMessageToA2AAgent(agentName, task)
                   .then((a2aResponse) => {
                     const newMessage: Message = {
@@ -167,9 +175,6 @@ export class A2AMiddlewareAgent extends AbstractAgent {
                       toolCallId: toolCallId,
                       content: `A2A Agent Response: ${a2aResponse}`,
                     };
-                    if (this.debug) {
-                      console.debug("newMessage From a2a agent", newMessage);
-                    }
                     this.addMessage(newMessage);
                     this.orchestrationAgent.addMessage(newMessage);
 
