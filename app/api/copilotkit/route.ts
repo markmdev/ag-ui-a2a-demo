@@ -15,7 +15,7 @@ import {
 } from "@copilotkit/runtime";
 import { HttpAgent } from "@ag-ui/client";
 // Using our fixed version of A2A Middleware that properly handles tool result context
-import { A2AMiddlewareAgentFixed as A2AMiddlewareAgent } from "@/lib/a2a-middleware-fixed";
+import { A2AMiddlewareAgent as A2AMiddlewareAgent } from "@/lib/pr-fixed";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {

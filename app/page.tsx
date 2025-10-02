@@ -34,12 +34,18 @@ export default function Home() {
         {/* Agent Legend */}
         <div className="p-4 border-t border-gray-200 space-y-2 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-            <span className="text-gray-600">Itinerary Agent (LangGraph)</span>
+            <div className="flex items-center gap-1 px-2 py-1 rounded bg-gradient-to-r from-emerald-100 to-green-100 border border-emerald-400">
+              <span className="text-xs">🔗</span>
+              <span className="text-emerald-800 font-semibold text-[10px]">LangGraph</span>
+            </div>
+            <span className="text-gray-600">Itinerary Agent</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-            <span className="text-gray-600">Budget Agent (ADK)</span>
+            <div className="flex items-center gap-1 px-2 py-1 rounded bg-gradient-to-r from-blue-100 to-sky-100 border border-blue-400">
+              <span className="text-xs">✨</span>
+              <span className="text-blue-800 font-semibold text-[10px]">ADK</span>
+            </div>
+            <span className="text-gray-600">Budget Agent</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-gray-500"></div>
@@ -74,11 +80,24 @@ export default function Home() {
             </div>
           )}
 
-          {/* Display Itinerary */}
-          {itineraryData && <ItineraryCard data={itineraryData} />}
+          {/* Display Itinerary and Budget Side-by-Side */}
+          {(itineraryData || budgetData) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Display Itinerary */}
+              {itineraryData && (
+                <div>
+                  <ItineraryCard data={itineraryData} />
+                </div>
+              )}
 
-          {/* Display Budget */}
-          {budgetData && <BudgetBreakdown data={budgetData} />}
+              {/* Display Budget */}
+              {budgetData && (
+                <div>
+                  <BudgetBreakdown data={budgetData} />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

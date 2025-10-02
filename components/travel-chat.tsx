@@ -66,34 +66,71 @@ const MessageToA2A = ({ status, args }: MessageActionRenderProps) => {
       return null;
   }
 
-  // Determine agent color based on agent name
-  const getAgentColor = (agentName: string) => {
+  // Determine agent styling based on agent name
+  const getAgentStyle = (agentName: string) => {
     if (agentName.toLowerCase().includes("itinerary")) {
-      return "bg-purple-100 text-purple-700 border-purple-300";
+      // LangGraph - Green branding
+      return {
+        bgColor: "bg-gradient-to-r from-emerald-100 to-green-100",
+        textColor: "text-emerald-800",
+        borderColor: "border-emerald-400",
+        icon: "🔗",
+        framework: "LangGraph",
+      };
     }
     if (agentName.toLowerCase().includes("budget")) {
-      return "bg-blue-100 text-blue-700 border-blue-300";
+      // Google ADK - Blue/Google branding
+      return {
+        bgColor: "bg-gradient-to-r from-blue-100 to-sky-100",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-400",
+        icon: "✨",
+        framework: "ADK",
+      };
     }
-    return "bg-gray-100 text-gray-700 border-gray-300";
+    return {
+      bgColor: "bg-gray-100",
+      textColor: "text-gray-700",
+      borderColor: "border-gray-300",
+      icon: "🤖",
+      framework: "",
+    };
   };
+
+  // Truncate long task descriptions
+  const truncateTask = (task: string, maxLength: number = 80) => {
+    if (task.length <= maxLength) return task;
+    return task.substring(0, maxLength) + "...";
+  };
+
+  const agentStyle = getAgentStyle(args.agentName);
 
   return (
     <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 my-2 a2a-message-enter">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 min-w-[200px]">
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-700 text-white">
-            Orchestrator
-          </span>
+      <div className="flex items-start gap-3">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-col items-center">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-700 text-white">
+              Orchestrator
+            </span>
+            <span className="text-[9px] text-gray-500 mt-0.5">ADK</span>
+          </div>
           <span className="text-gray-400 text-sm">→</span>
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAgentColor(
-              args.agentName
-            )}`}
-          >
-            {args.agentName}
-          </span>
+          <div className="flex flex-col items-center">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold border-2 ${agentStyle.bgColor} ${agentStyle.textColor} ${agentStyle.borderColor} flex items-center gap-1`}
+            >
+              <span>{agentStyle.icon}</span>
+              <span>{args.agentName}</span>
+            </span>
+            {agentStyle.framework && (
+              <span className="text-[9px] text-gray-500 mt-0.5">{agentStyle.framework}</span>
+            )}
+          </div>
         </div>
-        <span className="text-gray-700 text-sm flex-1">{args.task}</span>
+        <span className="text-gray-700 text-sm flex-1 min-w-0 break-words" title={args.task}>
+          {truncateTask(args.task)}
+        </span>
       </div>
     </div>
   );
@@ -112,16 +149,38 @@ const MessageFromA2A = ({ status, args }: MessageActionRenderProps) => {
       return null;
   }
 
-  // Determine agent color based on agent name
-  const getAgentColor = (agentName: string) => {
+  // Determine agent styling based on agent name
+  const getAgentStyle = (agentName: string) => {
     if (agentName.toLowerCase().includes("itinerary")) {
-      return "bg-purple-100 text-purple-700 border-purple-300";
+      // LangGraph - Green branding
+      return {
+        bgColor: "bg-gradient-to-r from-emerald-100 to-green-100",
+        textColor: "text-emerald-800",
+        borderColor: "border-emerald-400",
+        icon: "🔗",
+        framework: "LangGraph",
+      };
     }
     if (agentName.toLowerCase().includes("budget")) {
-      return "bg-blue-100 text-blue-700 border-blue-300";
+      // Google ADK - Blue/Google branding
+      return {
+        bgColor: "bg-gradient-to-r from-blue-100 to-sky-100",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-400",
+        icon: "✨",
+        framework: "ADK",
+      };
     }
-    return "bg-gray-100 text-gray-700 border-gray-300";
+    return {
+      bgColor: "bg-gray-100",
+      textColor: "text-gray-700",
+      borderColor: "border-gray-300",
+      icon: "🤖",
+      framework: "",
+    };
   };
+
+  const agentStyle = getAgentStyle(args.agentName);
 
   return (
     <div className="my-2">
@@ -129,17 +188,24 @@ const MessageFromA2A = ({ status, args }: MessageActionRenderProps) => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 min-w-[200px] flex-shrink-0">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAgentColor(
-                args.agentName
-              )}`}
-            >
-              {args.agentName}
-            </span>
+            <div className="flex flex-col items-center">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold border-2 ${agentStyle.bgColor} ${agentStyle.textColor} ${agentStyle.borderColor} flex items-center gap-1`}
+              >
+                <span>{agentStyle.icon}</span>
+                <span>{args.agentName}</span>
+              </span>
+              {agentStyle.framework && (
+                <span className="text-[9px] text-gray-500 mt-0.5">{agentStyle.framework}</span>
+              )}
+            </div>
             <span className="text-gray-400 text-sm">→</span>
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-700 text-white">
-              Orchestrator
-            </span>
+            <div className="flex flex-col items-center">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-700 text-white">
+                Orchestrator
+              </span>
+              <span className="text-[9px] text-gray-500 mt-0.5">ADK</span>
+            </div>
           </div>
           <span className="text-xs text-gray-600">✓ Response received</span>
         </div>
@@ -152,7 +218,7 @@ const MessageFromA2A = ({ status, args }: MessageActionRenderProps) => {
  * Inner chat component that uses CopilotKit hooks
  */
 const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
-  const [isApproved, setIsApproved] = useState(false);
+  const [approvalStates, setApprovalStates] = useState<Record<string, { approved: boolean; rejected: boolean }>>({});
   const { visibleMessages } = useCopilotChat();
 
   // Extract structured data from messages and pass to parent
@@ -195,7 +261,13 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
               if (parsed.destination && parsed.itinerary && Array.isArray(parsed.itinerary)) {
                 console.log("✅ DEBUG: Found itinerary data, updating parent");
                 onItineraryUpdate?.(parsed as ItineraryData);
-              } else if (parsed.totalBudget && parsed.breakdown && Array.isArray(parsed.breakdown)) {
+              } else if (
+                parsed.totalBudget &&
+                parsed.breakdown &&
+                Array.isArray(parsed.breakdown)
+              ) {
+                const budgetKey = `budget-${parsed.totalBudget}`;
+                const isApproved = approvalStates[budgetKey]?.approved || false;
                 console.log("✅ DEBUG: Found budget data, isApproved:", isApproved);
                 // Only update budget if it's been approved
                 if (isApproved) {
@@ -214,7 +286,7 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
     };
 
     extractDataFromMessages();
-  }, [visibleMessages, isApproved, onItineraryUpdate, onBudgetUpdate]);
+  }, [visibleMessages, approvalStates, onItineraryUpdate, onBudgetUpdate]);
 
   // Register the action renderer for A2A messages
   // This is called automatically by the A2A middleware when agents communicate
@@ -262,13 +334,23 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
         console.log("💰 DEBUG: args.budgetData:", args.budgetData);
         console.log("💰 DEBUG: typeof args.budgetData:", typeof args.budgetData);
 
-        const budget = args.budgetData as BudgetData;
-        console.log("💰 DEBUG: budget after cast:", budget);
-
-        if (!budget) {
-          console.error("❌ DEBUG: budget is undefined or null!");
-          return <div className="text-red-500 p-4">Error: Budget data not available</div>;
+        // Handle case where budgetData might be undefined or incomplete
+        if (!args.budgetData || typeof args.budgetData !== "object") {
+          return <div className="text-xs text-gray-500 p-2">Loading budget data...</div>;
         }
+
+        const budget = args.budgetData as BudgetData;
+
+        // Validate budget has required fields
+        if (!budget.totalBudget || !budget.breakdown) {
+          return <div className="text-xs text-gray-500 p-2">Loading budget data...</div>;
+        }
+
+        // Create unique key for this budget based on total amount
+        const budgetKey = `budget-${budget.totalBudget}`;
+        const currentState = approvalStates[budgetKey] || { approved: false, rejected: false };
+        const isApproved = currentState.approved;
+        const isRejected = currentState.rejected;
 
         // Format currency
         const formatCurrency = (amount: number) => {
@@ -287,7 +369,9 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
               <div className="text-3xl">💰</div>
               <div>
                 <h3 className="text-xl font-bold text-amber-900">Budget Approval Required</h3>
-                <p className="text-sm text-amber-700">Please review and approve the estimated budget</p>
+                <p className="text-sm text-amber-700">
+                  Please review and approve the estimated budget
+                </p>
               </div>
             </div>
 
@@ -322,17 +406,37 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
               )}
             </div>
 
+            {/* Rejection Message */}
+            {isRejected && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 text-red-800">
+                  <span className="text-lg">❌</span>
+                  <div>
+                    <p className="font-semibold text-sm">Budget Rejected</p>
+                    <p className="text-xs text-red-700">
+                      The agent has been notified and may revise the budget based on your feedback.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => {
-                  setIsApproved(true);
+                  setApprovalStates((prev) => ({
+                    ...prev,
+                    [budgetKey]: { approved: true, rejected: false },
+                  }));
                   respond?.({ approved: true, message: "Budget approved by user" });
                 }}
-                disabled={isApproved}
-                className={`flex-1 font-semibold py-3 px-6 rounded-lg transition-all ${
+                disabled={isApproved || isRejected}
+                className={`flex-1 text-xs font-semibold py-1 px-3 rounded transition-all ${
                   isApproved
                     ? "bg-green-600 text-white cursor-not-allowed"
+                    : isRejected
+                    ? "bg-gray-400 text-white cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700 text-white"
                 }`}
               >
@@ -340,19 +444,27 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
               </button>
               <button
                 onClick={() => {
+                  setApprovalStates((prev) => ({
+                    ...prev,
+                    [budgetKey]: { approved: false, rejected: true },
+                  }));
                   respond?.({ approved: false, message: "Budget rejected by user" });
                 }}
-                disabled={isApproved}
-                className="flex-1 font-semibold py-3 px-6 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isApproved || isRejected}
+                className={`flex-1 text-xs font-semibold py-1 px-3 rounded transition-all ${
+                  isRejected
+                    ? "bg-red-800 text-white cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                }`}
               >
-                Reject
+                {isRejected ? "✗ Rejected" : "Reject"}
               </button>
             </div>
           </div>
         );
       },
     },
-    [isApproved]
+    [approvalStates]
   );
 
   return (
@@ -360,7 +472,8 @@ const ChatInner = ({ onItineraryUpdate, onBudgetUpdate }: TravelChatProps) => {
       <CopilotChat
         className="h-full"
         labels={{
-          initial: "👋 Hi! I'm your travel planning assistant.\n\nAsk me to plan a trip and I'll coordinate with specialized agents to create your perfect itinerary!",
+          initial:
+            "👋 Hi! I'm your travel planning assistant.\n\nAsk me to plan a trip and I'll coordinate with specialized agents to create your perfect itinerary!",
         }}
         instructions="You are a helpful travel planning assistant. Help users plan their trips by coordinating with specialized agents."
       />
