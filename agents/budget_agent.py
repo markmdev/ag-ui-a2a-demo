@@ -8,7 +8,7 @@ It exposes an A2A Protocol endpoint so it can be called by the orchestrator.
 import uvicorn
 import os
 import json
-from typing import Any, AsyncIterable, List
+from typing import List
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
@@ -70,10 +70,6 @@ class BudgetAgent:
             session_service=InMemorySessionService(),
             memory_service=InMemoryMemoryService(),
         )
-
-    def get_processing_message(self) -> str:
-        """Return a message to display while processing."""
-        return 'Analyzing travel requirements and calculating budget estimates...'
 
     def _build_agent(self) -> LlmAgent:
         """Build the LLM agent for budget estimation using ADK."""
@@ -137,16 +133,16 @@ Return ONLY valid JSON, no markdown code blocks, no other text.
             tools=[],  # No tools needed for this agent currently
         )
 
-    async def stream(self, query: str, session_id: str) -> AsyncIterable[dict[str, Any]]:
+    async def invoke(self, query: str, session_id: str) -> str:
         """
-        Stream budget estimation results using ADK runner.
+        Generate budget estimation using ADK runner.
 
         Args:
             query: The user's travel budget request
             session_id: Session ID for conversation continuity
 
-        Yields:
-            dict: Events with 'is_task_complete' and either 'content' or 'updates'
+        Returns:
+            str: JSON string with budget breakdown
         """
         # Get or create session
         session = await self._runner.session_service.get_session(
@@ -169,15 +165,15 @@ Return ONLY valid JSON, no markdown code blocks, no other text.
                 session_id=session_id,
             )
 
-        # Run the agent and stream results
+        # Run the agent and wait for final response
+        response_text = ''
         async for event in self._runner.run_async(
             user_id=self._user_id,
             session_id=session.id,
             new_message=content
         ):
-            # Check if this is the final response
+            # Wait for the final response
             if event.is_final_response():
-                response_text = ''
                 if (
                     event.content
                     and event.content.parts
@@ -187,49 +183,40 @@ Return ONLY valid JSON, no markdown code blocks, no other text.
                     response_text = '\n'.join(
                         [p.text for p in event.content.parts if p.text]
                     )
+                break
 
-                # Try to parse and validate JSON response
-                content_str = response_text.strip()
+        # Try to parse and validate JSON response
+        content_str = response_text.strip()
 
-                # Try to extract JSON from markdown code blocks if present
-                if "```json" in content_str:
-                    content_str = content_str.split("```json")[1].split("```")[0].strip()
-                elif "```" in content_str:
-                    content_str = content_str.split("```")[1].split("```")[0].strip()
+        # Try to extract JSON from markdown code blocks if present
+        if "```json" in content_str:
+            content_str = content_str.split("```json")[1].split("```")[0].strip()
+        elif "```" in content_str:
+            content_str = content_str.split("```")[1].split("```")[0].strip()
 
-                try:
-                    # Validate it's proper JSON
-                    structured_data = json.loads(content_str)
-                    validated_budget = StructuredBudget(**structured_data)
+        try:
+            # Validate it's proper JSON
+            structured_data = json.loads(content_str)
+            validated_budget = StructuredBudget(**structured_data)
 
-                    # Return JSON string
-                    final_response = json.dumps(validated_budget.model_dump(), indent=2)
-                    print("✅ Successfully created structured budget")
-                except json.JSONDecodeError as e:
-                    print(f"❌ JSON parsing error: {e}")
-                    print(f"Content: {content_str}")
-                    # Fallback
-                    final_response = json.dumps({
-                        "error": "Failed to generate structured budget",
-                        "raw_content": content_str[:200]
-                    })
-                except Exception as e:
-                    print(f"❌ Validation error: {e}")
-                    # Fallback
-                    final_response = json.dumps({
-                        "error": f"Validation failed: {str(e)}"
-                    })
-
-                yield {
-                    'is_task_complete': True,
-                    'content': final_response,
-                }
-            else:
-                # Intermediate processing event
-                yield {
-                    'is_task_complete': False,
-                    'updates': self.get_processing_message(),
-                }
+            # Return JSON string
+            final_response = json.dumps(validated_budget.model_dump(), indent=2)
+            print("✅ Successfully created structured budget")
+            return final_response
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON parsing error: {e}")
+            print(f"Content: {content_str}")
+            # Fallback
+            return json.dumps({
+                "error": "Failed to generate structured budget",
+                "raw_content": content_str[:200]
+            })
+        except Exception as e:
+            print(f"❌ Validation error: {e}")
+            # Fallback
+            return json.dumps({
+                "error": f"Validation failed: {str(e)}"
+            })
 
 
 # Define the A2A agent card
@@ -274,8 +261,7 @@ class BudgetAgentExecutor(AgentExecutor):
         """
         Execute the agent and send results back via A2A Protocol.
 
-        Simplified to match the Itinerary Agent pattern - just stream
-        and return the final text message without task complexity.
+        Waits for the complete response and returns it as a single message.
         """
         # Extract the user's query from the context
         query = context.get_user_input()
@@ -283,12 +269,8 @@ class BudgetAgentExecutor(AgentExecutor):
         # Use a session ID from context if available, otherwise generate one
         session_id = getattr(context, 'context_id', 'default_session')
 
-        # Stream events from the ADK agent and get the final result
-        final_content = ""
-        async for item in self.agent.stream(query, session_id):
-            if item['is_task_complete']:
-                final_content = item['content']
-                break
+        # Get the final result from the agent
+        final_content = await self.agent.invoke(query, session_id)
 
         # Send the final result as a simple text message
         await event_queue.enqueue_event(new_agent_text_message(final_content))
