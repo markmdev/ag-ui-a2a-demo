@@ -23,6 +23,17 @@ import { AgentStyle } from "../types";
  * @returns AgentStyle object with colors, icon, and framework label
  */
 export function getAgentStyle(agentName: string): AgentStyle {
+  // Handle undefined/null agentName gracefully
+  if (!agentName) {
+    return {
+      bgColor: "bg-gray-100",
+      textColor: "text-gray-700",
+      borderColor: "border-gray-300",
+      icon: "🤖",
+      framework: "",
+    };
+  }
+
   const nameLower = agentName.toLowerCase();
 
   // LangGraph agents - Green branding
