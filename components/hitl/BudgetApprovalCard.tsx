@@ -46,7 +46,7 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
   };
 
   return (
-    <div className="bg-[#FFF388]/30 backdrop-blur-md border-2 border-[#FFF388] rounded-lg p-4 my-3 shadow-elevation-md">
+    <div className="bg-[#E4D4F4]/30 backdrop-blur-md border-2 border-[#BEC2FF] rounded-lg p-4 my-3 shadow-elevation-md">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <div className="text-2xl">💰</div>
