@@ -98,43 +98,43 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
               </div>
 
               {/* Time Slots and Meals Side-by-Side */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-                {/* Time Slots - Takes 2 columns */}
-                <div className="lg:col-span-2 space-y-2">
-                <div className="flex items-center gap-1 mb-1">
-                  <span className="text-sm">📅</span>
-                  <h4 className="text-sm font-semibold text-gray-800">Day Itinerary</h4>
+              <div className="grid grid-cols-1 lg:grid-cols-7 gap-2">
+                {/* Time Slots - Takes 1 column */}
+                <div className="lg:col-span-3 space-y-2">
+                  <div className="flex items-center gap-1 mb-1">
+                    <span className="text-sm">📅</span>
+                    <h4 className="text-sm font-semibold text-gray-800">Day Itinerary</h4>
+                  </div>
+                  {/* Morning */}
+                  <TimeSlotSection
+                    icon="🌅"
+                    title="Morning"
+                    location={day.morning.location}
+                    activities={day.morning.activities}
+                    color="orange"
+                  />
+
+                  {/* Afternoon */}
+                  <TimeSlotSection
+                    icon="☀️"
+                    title="Afternoon"
+                    location={day.afternoon.location}
+                    activities={day.afternoon.activities}
+                    color="yellow"
+                  />
+
+                  {/* Evening */}
+                  <TimeSlotSection
+                    icon="🌆"
+                    title="Evening"
+                    location={day.evening.location}
+                    activities={day.evening.activities}
+                    color="blue"
+                  />
                 </div>
-                {/* Morning */}
-                <TimeSlotSection
-                  icon="🌅"
-                  title="Morning"
-                  location={day.morning.location}
-                  activities={day.morning.activities}
-                  color="orange"
-                />
 
-                {/* Afternoon */}
-                <TimeSlotSection
-                  icon="☀️"
-                  title="Afternoon"
-                  location={day.afternoon.location}
-                  activities={day.afternoon.activities}
-                  color="yellow"
-                />
-
-                {/* Evening */}
-                <TimeSlotSection
-                  icon="🌆"
-                  title="Evening"
-                  location={day.evening.location}
-                  activities={day.evening.activities}
-                  color="blue"
-                />
-              </div>
-
-                {/* Meals - Takes 1 column */}
-                <div className="lg:col-span-1 flex flex-col">
+                {/* Meals - Takes 2 columns */}
+                <div className="lg:col-span-4 flex flex-col">
                   <div className="lg:border-l lg:border-gray-100 lg:pl-2 flex flex-col h-full">
                     <div className="flex items-center gap-1 mb-1">
                       <span className="text-sm">🍽️</span>
@@ -156,13 +156,19 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                         // Show placeholder while waiting for restaurant data
                         <>
                           <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
-                            <span className="text-[10px] text-gray-400">Awaiting recommendations...</span>
+                            <span className="text-[10px] text-gray-400">
+                              Awaiting recommendations...
+                            </span>
                           </div>
                           <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
-                            <span className="text-[10px] text-gray-400">Awaiting recommendations...</span>
+                            <span className="text-[10px] text-gray-400">
+                              Awaiting recommendations...
+                            </span>
                           </div>
                           <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
-                            <span className="text-[10px] text-gray-400">Awaiting recommendations...</span>
+                            <span className="text-[10px] text-gray-400">
+                              Awaiting recommendations...
+                            </span>
                           </div>
                         </>
                       )}
@@ -232,9 +238,7 @@ const MealItem: React.FC<MealItemProps> = ({ icon, label, meal }) => {
       <span className="text-xs">{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="text-xs font-medium text-gray-500">{label}</div>
-        <div className="text-xs text-gray-700 break-words">
-          {meal}
-        </div>
+        <div className="text-xs text-gray-700 break-words">{meal}</div>
       </div>
     </div>
   );

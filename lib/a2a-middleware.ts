@@ -38,7 +38,7 @@ export interface A2AAgentConfig extends AgentConfig {
   orchestrationAgent: AbstractAgent;
 }
 
-export class A2AMiddlewareAgentFixed extends AbstractAgent {
+export class A2AMiddlewareAgent extends AbstractAgent {
   agentClients: A2AClient[];
   agentCards: Promise<AgentCard[]>;
   instructions?: string;
@@ -58,7 +58,7 @@ export class A2AMiddlewareAgentFixed extends AbstractAgent {
       timestamp?: number | undefined;
       rawEvent?: any;
     }>,
-    pendingTextMessages: Set<string>,
+    pendingTextMessages: Set<string>
   ): void {
     pendingTextMessages.forEach((messageId) => {
       observer.next({
@@ -78,7 +78,7 @@ export class A2AMiddlewareAgentFixed extends AbstractAgent {
       timestamp?: number | undefined;
       rawEvent?: any;
     }>,
-    input: RunAgentInput,
+    input: RunAgentInput
   ): any {
     const applyAndProcessEvents = (source$: Observable<BaseEvent>) => {
       // Apply events to get mutations
@@ -202,7 +202,7 @@ export class A2AMiddlewareAgentFixed extends AbstractAgent {
 
                 // 🔧 FIX: Add all tool result messages to input.messages BEFORE triggering new run
                 // This ensures the orchestrator sees the tool results in its context
-                newToolMessages.forEach(msg => {
+                newToolMessages.forEach((msg) => {
                   input.messages.push(msg);
                 });
 
@@ -293,7 +293,7 @@ export class A2AMiddlewareAgentFixed extends AbstractAgent {
 
     if ("error" in sendResponse) {
       throw new Error(
-        `Error sending message to agent "${agentName}": ${sendResponse.error.message}`,
+        `Error sending message to agent "${agentName}": ${sendResponse.error.message}`
       );
     }
 
@@ -313,7 +313,7 @@ export class A2AMiddlewareAgentFixed extends AbstractAgent {
     observer: any,
     input: RunAgentInput,
     pendingA2ACalls: Set<string>,
-    pendingTextMessages: Set<string>,
+    pendingTextMessages: Set<string>
   ): void {
     const newRunStream = this.orchestrationAgent.run(input);
     this.wrapStream(newRunStream, pendingA2ACalls, pendingTextMessages, observer, input);
