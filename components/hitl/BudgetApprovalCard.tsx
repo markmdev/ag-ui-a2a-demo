@@ -46,35 +46,35 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-6 my-4 shadow-lg">
+    <div className="bg-[#FFF388]/30 backdrop-blur-md border-2 border-[#FFF388] rounded-lg p-4 my-3 shadow-elevation-md">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="text-3xl">💰</div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="text-2xl">💰</div>
         <div>
-          <h3 className="text-xl font-bold text-amber-900">Budget Approval Required</h3>
-          <p className="text-sm text-amber-700">Please review and approve the estimated budget</p>
+          <h3 className="text-base font-semibold text-[#010507]">Budget Approval Required</h3>
+          <p className="text-xs text-[#57575B]">Please review and approve the estimated budget</p>
         </div>
       </div>
 
       {/* Budget Summary */}
-      <div className="bg-white rounded-lg p-4 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-gray-600 font-medium">Total Budget</span>
-          <span className="text-3xl font-bold text-gray-900">
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 mb-3 border border-[#DBDBE5] shadow-elevation-sm">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[#57575B] font-medium text-sm">Total Budget</span>
+          <span className="text-2xl font-bold text-[#010507]">
             {formatCurrency(budgetData.totalBudget)}
           </span>
         </div>
 
         {/* Breakdown */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {budgetData.breakdown?.map((category, idx) => (
-            <div key={idx} className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">{category.category}</span>
+            <div key={idx} className="flex items-center justify-between text-xs">
+              <span className="text-[#57575B]">{category.category}</span>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-[#010507]">
                   {formatCurrency(category.amount)}
                 </span>
-                <span className="text-gray-400">({category.percentage.toFixed(0)}%)</span>
+                <span className="text-[#838389]">({category.percentage.toFixed(0)}%)</span>
               </div>
             </div>
           ))}
@@ -82,21 +82,21 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
 
         {/* Notes */}
         {budgetData.notes && (
-          <div className="mt-3 pt-3 border-t border-gray-200">
-            <p className="text-xs text-gray-600">{budgetData.notes}</p>
+          <div className="mt-2 pt-2 border-t border-[#E9E9EF]">
+            <p className="text-xs text-[#57575B]">{budgetData.notes}</p>
           </div>
         )}
       </div>
 
       {/* Rejection Message */}
       {isRejected && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-          <div className="flex items-center gap-2 text-red-800">
-            <span className="text-lg">❌</span>
+        <div className="bg-[#FFAC4D]/20 border border-[#FFAC4D] rounded-lg p-2.5 mb-3">
+          <div className="flex items-center gap-2 text-[#010507]">
+            <span className="text-base">❌</span>
             <div>
-              <p className="font-semibold text-sm">Budget Rejected</p>
-              <p className="text-xs text-red-700">
-                The agent has been notified and may revise the budget based on your feedback.
+              <p className="font-semibold text-xs">Budget Rejected</p>
+              <p className="text-xs text-[#57575B]">
+                The agent has been notified and may revise the budget.
               </p>
             </div>
           </div>
@@ -108,12 +108,12 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
         <button
           onClick={onApprove}
           disabled={isApproved || isRejected}
-          className={`flex-1 text-xs font-semibold py-1 px-3 rounded transition-all ${
+          className={`flex-1 text-xs font-semibold py-2.5 px-3 rounded-lg transition-all shadow-elevation-sm ${
             isApproved
-              ? "bg-green-600 text-white cursor-not-allowed"
+              ? "bg-[#1B936F] text-white cursor-not-allowed"
               : isRejected
-              ? "bg-gray-400 text-white cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700 text-white"
+              ? "bg-[#838389] text-white cursor-not-allowed"
+              : "bg-[#1B936F] hover:bg-[#189370] text-white"
           }`}
         >
           {isApproved ? "✓ Approved" : "Approve Budget"}
@@ -121,10 +121,10 @@ export const BudgetApprovalCard: React.FC<BudgetApprovalCardProps> = ({
         <button
           onClick={onReject}
           disabled={isApproved || isRejected}
-          className={`flex-1 text-xs font-semibold py-1 px-3 rounded transition-all ${
+          className={`flex-1 text-xs font-semibold py-2.5 px-3 rounded-lg transition-all shadow-elevation-sm ${
             isRejected
-              ? "bg-red-800 text-white cursor-not-allowed"
-              : "bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              ? "bg-[#FFAC4D] text-white cursor-not-allowed"
+              : "bg-[#FFAC4D] hover:bg-[#FF9E3D] text-white disabled:opacity-50 disabled:cursor-not-allowed"
           }`}
         >
           {isRejected ? "✗ Rejected" : "Reject"}

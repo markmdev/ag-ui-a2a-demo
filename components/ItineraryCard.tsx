@@ -67,14 +67,14 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 my-3 border border-purple-200 shadow-lg animate-fade-in-up">
+    <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 my-3 border-2 border-[#DBDBE5] shadow-elevation-md animate-fade-in-up">
       {/* Header */}
       <div className="mb-3">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🗺️</span>
-          <h2 className="text-xl font-bold text-purple-900">{data.destination} Itinerary</h2>
+          <h2 className="text-xl font-semibold text-[#010507]">{data.destination} Itinerary</h2>
         </div>
-        <p className="text-purple-700 text-xs">
+        <p className="text-[#57575B] text-xs">
           {data.days} day{data.days > 1 ? "s" : ""} of adventure
         </p>
       </div>
@@ -88,13 +88,13 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
           const mealsToDisplay = restaurantMeals || day.meals;
 
           return (
-            <div key={index} className="bg-white rounded-lg p-3 shadow-md border border-purple-100">
+            <div key={index} className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-elevation-sm border border-[#E9E9EF]">
               {/* Day Header */}
-              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-purple-100">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white font-bold text-sm">
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#DBDBE5]">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#BEC2FF] text-white font-bold text-sm">
                   {day.day}
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">{day.title}</h3>
+                <h3 className="text-lg font-semibold text-[#010507]">{day.title}</h3>
               </div>
 
               {/* Time Slots and Meals Side-by-Side */}
@@ -103,7 +103,7 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                 <div className="lg:col-span-3 space-y-2">
                   <div className="flex items-center gap-1 mb-1">
                     <span className="text-sm">📅</span>
-                    <h4 className="text-sm font-semibold text-gray-800">Day Itinerary</h4>
+                    <h4 className="text-sm font-semibold text-[#010507]">Day Itinerary</h4>
                   </div>
                   {/* Morning */}
                   <TimeSlotSection
@@ -135,12 +135,12 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
 
                 {/* Meals - Takes 2 columns */}
                 <div className="lg:col-span-4 flex flex-col">
-                  <div className="lg:border-l lg:border-gray-100 lg:pl-2 flex flex-col h-full">
+                  <div className="lg:border-l lg:border-[#DBDBE5] lg:pl-2 flex flex-col h-full">
                     <div className="flex items-center gap-1 mb-1">
                       <span className="text-sm">🍽️</span>
-                      <h4 className="text-sm font-semibold text-gray-800">Meals</h4>
+                      <h4 className="text-sm font-semibold text-[#010507]">Meals</h4>
                       {!restaurantMeals && (
-                        <span className="ml-auto text-[9px] text-blue-600 font-medium animate-pulse">
+                        <span className="ml-auto text-[9px] text-[#BEC2FF] font-medium animate-pulse">
                           Loading...
                         </span>
                       )}
@@ -155,18 +155,18 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ data, restaurantDa
                       ) : (
                         // Show placeholder while waiting for restaurant data
                         <>
-                          <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
-                            <span className="text-[10px] text-gray-400">
+                          <div className="flex-1 flex items-center justify-center bg-[#F7F7F9] rounded p-1">
+                            <span className="text-[10px] text-[#838389]">
                               Awaiting recommendations...
                             </span>
                           </div>
-                          <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
-                            <span className="text-[10px] text-gray-400">
+                          <div className="flex-1 flex items-center justify-center bg-[#F7F7F9] rounded p-1">
+                            <span className="text-[10px] text-[#838389]">
                               Awaiting recommendations...
                             </span>
                           </div>
-                          <div className="flex-1 flex items-center justify-center bg-gray-50 rounded p-1">
-                            <span className="text-[10px] text-gray-400">
+                          <div className="flex-1 flex items-center justify-center bg-[#F7F7F9] rounded p-1">
+                            <span className="text-[10px] text-[#838389]">
                               Awaiting recommendations...
                             </span>
                           </div>
@@ -201,22 +201,22 @@ const TimeSlotSection: React.FC<TimeSlotSectionProps> = ({
   color,
 }) => {
   const colorClasses = {
-    orange: "bg-orange-50 border-orange-200",
-    yellow: "bg-yellow-50 border-yellow-200",
-    blue: "bg-blue-50 border-blue-200",
+    orange: "bg-[#FFAC4D]/10 border-[#FFAC4D]",
+    yellow: "bg-[#FFF388]/10 border-[#FFF388]",
+    blue: "bg-[#BEC2FF]/10 border-[#BEC2FF]",
   };
 
   return (
     <div className={`rounded-lg p-2 border ${colorClasses[color]}`}>
       <div className="flex items-center gap-1 mb-1">
         <span className="text-sm">{icon}</span>
-        <h4 className="text-sm font-semibold text-gray-800">{title}</h4>
-        <span className="text-xs text-gray-500">• {location}</span>
+        <h4 className="text-sm font-semibold text-[#010507]">{title}</h4>
+        <span className="text-xs text-[#838389]">• {location}</span>
       </div>
       <ul className="space-y-0.5 ml-5">
         {activities.map((activity, idx) => (
-          <li key={idx} className="text-xs text-gray-700 flex items-start">
-            <span className="text-gray-400 mr-1">•</span>
+          <li key={idx} className="text-xs text-[#57575B] flex items-start">
+            <span className="text-[#838389] mr-1">•</span>
             <span>{activity}</span>
           </li>
         ))}
@@ -234,11 +234,11 @@ interface MealItemProps {
 
 const MealItem: React.FC<MealItemProps> = ({ icon, label, meal }) => {
   return (
-    <div className="flex items-start gap-1 p-1 bg-gray-50 rounded flex-1">
+    <div className="flex items-start gap-1 p-1 bg-[#F7F7F9] rounded flex-1 border border-[#E9E9EF]">
       <span className="text-xs">{icon}</span>
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-medium text-gray-500">{label}</div>
-        <div className="text-xs text-gray-700 break-words">{meal}</div>
+        <div className="text-xs font-medium text-[#838389]">{label}</div>
+        <div className="text-xs text-[#010507] break-words">{meal}</div>
       </div>
     </div>
   );

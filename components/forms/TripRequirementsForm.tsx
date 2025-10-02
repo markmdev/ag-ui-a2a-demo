@@ -107,12 +107,12 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
   // Show success state after submission
   if (submitted) {
     return (
-      <div className="bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-300 rounded-xl p-6 my-4 shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="text-3xl">✓</div>
+      <div className="bg-[#85E0CE]/30 backdrop-blur-md border-2 border-[#85E0CE] rounded-lg p-4 my-3 shadow-elevation-md">
+        <div className="flex items-center gap-2">
+          <div className="text-2xl">✓</div>
           <div>
-            <h3 className="text-xl font-bold text-green-900">Trip Requirements Submitted</h3>
-            <p className="text-sm text-green-700">
+            <h3 className="text-base font-semibold text-[#010507]">Trip Requirements Submitted</h3>
+            <p className="text-xs text-[#57575B]">
               Planning your {numberOfDays}-day trip to {city} for {numberOfPeople} people with{" "}
               {budgetLevel} budget...
             </p>
@@ -124,21 +124,21 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
 
   // Render the form
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-300 rounded-xl p-6 my-4 shadow-lg">
+    <div className="bg-[#BEC2FF]/30 backdrop-blur-md border-2 border-[#BEC2FF] rounded-lg p-4 my-3 shadow-elevation-md">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="text-3xl">✈️</div>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="text-2xl">✈️</div>
         <div>
-          <h3 className="text-xl font-bold text-blue-900">Trip Planning Details</h3>
-          <p className="text-sm text-blue-700">Please provide some information about your trip</p>
+          <h3 className="text-base font-semibold text-[#010507]">Trip Planning Details</h3>
+          <p className="text-xs text-[#57575B]">Please provide some information about your trip</p>
         </div>
       </div>
 
       {/* Form Fields */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* City Input */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-xs font-medium text-[#010507] mb-1.5">
             Destination City *
           </label>
           <input
@@ -146,79 +146,92 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="e.g., Paris, Tokyo, New York"
-            className={`w-full px-4 py-2 rounded-lg border-2 transition-colors ${
+            className={`w-full px-3 py-2 text-sm rounded-lg border-2 transition-colors ${
               errors.city
-                ? "border-red-300 bg-red-50"
-                : "border-gray-300 bg-white focus:border-blue-500 focus:outline-none"
+                ? "border-[#FFAC4D] bg-[#FFAC4D]/10"
+                : "border-[#DBDBE5] bg-white/80 backdrop-blur-sm focus:border-[#BEC2FF] focus:outline-none"
             }`}
           />
-          {errors.city && <p className="text-xs text-red-600 mt-1">{errors.city}</p>}
+          {errors.city && <p className="text-xs text-[#FFAC4D] mt-1">{errors.city}</p>}
         </div>
 
-        {/* Number of Days */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Number of Days (1-7) *
-          </label>
-          <div className="flex items-center gap-4">
-            <input
-              type="range"
-              min="1"
-              max="7"
-              value={numberOfDays}
-              onChange={(e) => setNumberOfDays(parseInt(e.target.value))}
-              className="flex-1 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
-            />
-            <div className="w-12 text-center">
-              <span className="text-2xl font-bold text-blue-900">{numberOfDays}</span>
+        {/* Number of Days and People - Side by side */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Number of Days */}
+          <div>
+            <label className="block text-xs font-medium text-[#010507] mb-1.5">
+              Days (1-7) *
+            </label>
+            <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm border-2 border-[#DBDBE5] rounded-lg px-3 py-2.5">
+              <div className="flex-1 px-1">
+                <input
+                  type="range"
+                  min="1"
+                  max="7"
+                  value={numberOfDays}
+                  onChange={(e) => setNumberOfDays(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-[#E9E9EF] rounded-lg appearance-none cursor-pointer"
+                  style={{
+                    WebkitAppearance: 'none',
+                    background: `linear-gradient(to right, #BEC2FF 0%, #BEC2FF ${((numberOfDays - 1) / 6) * 100}%, #E9E9EF ${((numberOfDays - 1) / 6) * 100}%, #E9E9EF 100%)`
+                  }}
+                />
+              </div>
+              <span className="text-lg font-bold text-[#010507] min-w-[24px] text-center">{numberOfDays}</span>
             </div>
+            {errors.numberOfDays && (
+              <p className="text-xs text-[#FFAC4D] mt-1">{errors.numberOfDays}</p>
+            )}
           </div>
-          {errors.numberOfDays && (
-            <p className="text-xs text-red-600 mt-1">{errors.numberOfDays}</p>
-          )}
-        </div>
 
-        {/* Number of People */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Number of People (1-15) *
-          </label>
-          <div className="flex items-center gap-4">
-            <input
-              type="range"
-              min="1"
-              max="15"
-              value={numberOfPeople}
-              onChange={(e) => setNumberOfPeople(parseInt(e.target.value))}
-              className="flex-1 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
-            />
-            <div className="w-12 text-center">
-              <span className="text-2xl font-bold text-blue-900">{numberOfPeople}</span>
+          {/* Number of People */}
+          <div>
+            <label className="block text-xs font-medium text-[#010507] mb-1.5">
+              People (1-15) *
+            </label>
+            <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm border-2 border-[#DBDBE5] rounded-lg px-3 py-2.5">
+              <div className="flex-1 px-1">
+                <input
+                  type="range"
+                  min="1"
+                  max="15"
+                  value={numberOfPeople}
+                  onChange={(e) => setNumberOfPeople(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-[#E9E9EF] rounded-lg appearance-none cursor-pointer"
+                  style={{
+                    WebkitAppearance: 'none',
+                    background: `linear-gradient(to right, #85E0CE 0%, #85E0CE ${((numberOfPeople - 1) / 14) * 100}%, #E9E9EF ${((numberOfPeople - 1) / 14) * 100}%, #E9E9EF 100%)`
+                  }}
+                />
+              </div>
+              <span className="text-lg font-bold text-[#010507] min-w-[24px] text-center">{numberOfPeople}</span>
             </div>
+            {errors.numberOfPeople && (
+              <p className="text-xs text-[#FFAC4D] mt-1">{errors.numberOfPeople}</p>
+            )}
           </div>
-          {errors.numberOfPeople && (
-            <p className="text-xs text-red-600 mt-1">{errors.numberOfPeople}</p>
-          )}
         </div>
 
         {/* Budget Level Selector */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Budget Level *</label>
-          <div className="grid grid-cols-3 gap-3">
+          <label className="block text-xs font-medium text-[#010507] mb-1.5">Budget Level *</label>
+          <div className="grid grid-cols-3 gap-2">
             {["Economy", "Comfort", "Premium"].map((level) => (
               <button
                 key={level}
                 onClick={() => setBudgetLevel(level)}
-                className={`py-3 px-4 rounded-lg font-semibold text-sm transition-all ${
+                className={`py-2 px-3 rounded-lg font-medium text-xs transition-all shadow-elevation-sm ${
                   budgetLevel === level
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105"
-                    : "bg-white text-gray-700 border-2 border-gray-300 hover:border-blue-400"
+                    ? "bg-[#BEC2FF] text-white shadow-elevation-md scale-105"
+                    : "bg-white/80 backdrop-blur-sm text-[#010507] border-2 border-[#DBDBE5] hover:border-[#BEC2FF]"
                 }`}
               >
-                {level === "Economy" && "💰"}
-                {level === "Comfort" && "✨"}
-                {level === "Premium" && "👑"}
-                <div className="mt-1">{level}</div>
+                <div className="text-base mb-0.5">
+                  {level === "Economy" && "💰"}
+                  {level === "Comfort" && "✨"}
+                  {level === "Premium" && "👑"}
+                </div>
+                <div>{level}</div>
               </button>
             ))}
           </div>
@@ -226,10 +239,10 @@ export const TripRequirementsForm: React.FC<TripRequirementsFormProps> = ({ args
       </div>
 
       {/* Submit Button */}
-      <div className="mt-6">
+      <div className="mt-4">
         <button
           onClick={handleSubmit}
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-xl hover:scale-105"
+          className="w-full bg-[#1B936F] hover:bg-[#189370] text-white font-semibold py-2.5 px-4 text-sm rounded-lg transition-all shadow-elevation-md hover:shadow-elevation-lg"
         >
           Start Planning My Trip
         </button>
