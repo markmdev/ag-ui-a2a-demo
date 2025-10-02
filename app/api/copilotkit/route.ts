@@ -185,9 +185,6 @@ export async function POST(request: NextRequest) {
       - Each agent returns structured JSON - acknowledge and build on the information
       - Always provide a final response that synthesizes ALL gathered information
     `,
-
-    // Enable debug logging (useful during development)
-    debug: true,
   });
 
   // ========================================================================
