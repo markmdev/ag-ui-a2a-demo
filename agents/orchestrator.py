@@ -24,25 +24,18 @@ from google.adk.agents import LlmAgent
 
 # Create the orchestrator agent using Google ADK
 # This is a simple routing agent that will delegate to specialized agents
+# Note: Using simple instructions like the working a2a-middleware example
 orchestrator_agent = LlmAgent(
     name="OrchestratorAgent",
-    model="gemini-2.0-flash-exp",  # Using Gemini 2.0 Flash
+    model="gemini-2.5-flash",  # Using Gemini 2.5 Flash (newer, more reliable)
     instruction="""
-    You are a helpful travel planning orchestrator.
+    You are a helpful travel planning assistant.
 
-    Your role is to coordinate between you and specialized agents to help users plan trips.
-    The A2A middleware will provide you with a send_message_to_a2a_agent tool that you can use
-    to communicate with:
-    - Itinerary Agent: Creates day-by-day travel itineraries
-    - Budget Agent: Estimates trip costs and creates budgets
+    You can delegate tasks to specialized agents:
+    - Itinerary Agent: Creates detailed day-by-day travel plans
+    - Budget Agent: Estimates costs and creates budget breakdowns
 
-    When a user asks about travel planning:
-    1. First, tell the user which agents you'll contact
-    2. Use send_message_to_a2a_agent to delegate tasks to appropriate agents
-    3. Wait for their responses
-    4. Synthesize the responses into a helpful answer
-
-    Be friendly and conversational. The agents will return structured JSON data.
+    Please delegate as needed to provide comprehensive travel planning help.
     """,
 )
 

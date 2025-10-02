@@ -35,20 +35,20 @@ export async function POST(request: NextRequest) {
   // This agent wraps the orchestrator and connects it to the A2A agents
   // It automatically adds the send_message_to_a2a_agent tool to the orchestrator
   const a2aMiddlewareAgent = new A2AMiddlewareAgent({
-    description: "A2A-powered travel planning assistant",
+    description: "Travel planning assistant with itinerary and budget agents",
     // The orchestrator agent (speaks AG-UI Protocol)
     orchestrationAgent,
     // The A2A agent URLs (speak A2A Protocol)
     agentUrls: [itineraryAgentUrl, budgetAgentUrl],
-    // Custom instructions for the orchestrator
+    // Keep instructions simple and clear
     instructions: `
-      You are a travel planning assistant that coordinates between specialized agents.
+      You coordinate travel planning by delegating to specialized agents.
 
-      Important guidelines:
-      - Always contact BOTH the Itinerary Agent and Budget Agent for complete travel plans
-      - Tell the user which agents you're contacting before you do so
-      - Synthesize the responses from both agents into a cohesive answer
-      - The agents return JSON data - parse and present it nicely to the user
+      Available agents:
+      - Itinerary Agent: Creates day-by-day travel itineraries
+      - Budget Agent: Estimates travel costs and budgets
+
+      Contact both agents for complete travel plans. Present their responses clearly to the user.
     `,
   });
 
