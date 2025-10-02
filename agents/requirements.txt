@@ -1,0 +1,25 @@
+# AG-UI Protocol for ADK agents
+ag-ui-adk>=0.0.1
+
+# A2A Protocol SDK for Python
+a2a>=0.1.0
+a2a-sdk[http-server]
+
+# Google ADK for Gemini agents
+google-adk>=0.1.0
+litellm>=1.0.0
+
+# LangGraph for LangGraph agent
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-openai>=0.2.0
+
+# FastAPI for serving agents
+fastapi>=0.115.0
+uvicorn>=0.30.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# OpenAI for LangGraph agent
+openai>=1.0.0
