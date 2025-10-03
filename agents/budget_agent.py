@@ -36,16 +36,13 @@ from google.adk.artifacts import InMemoryArtifactService
 from google.genai import types
 
 
-# Pydantic models for structured budget output
 class BudgetCategory(BaseModel):
-    """Structured data for a budget category."""
     category: str = Field(description="Budget category name (e.g., Accommodation, Food)")
     amount: float = Field(description="Amount in USD")
     percentage: float = Field(description="Percentage of total budget")
 
 
 class StructuredBudget(BaseModel):
-    """Complete structured budget output."""
     totalBudget: float = Field(description="Total budget in USD")
     currency: str = Field(default="USD", description="Currency code")
     breakdown: List[BudgetCategory] = Field(description="Budget breakdown by category")
@@ -53,16 +50,11 @@ class StructuredBudget(BaseModel):
 
 
 class BudgetAgent:
-    """ADK-based budget estimation agent."""
-
     SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']
 
     def __init__(self):
-        # Build the ADK agent
         self._agent = self._build_agent()
         self._user_id = 'remote_agent'
-
-        # Initialize the ADK runner with required services
         self._runner = Runner(
             app_name=self._agent.name,
             agent=self._agent,
@@ -72,13 +64,11 @@ class BudgetAgent:
         )
 
     def _build_agent(self) -> LlmAgent:
-        """Build the LLM agent for budget estimation using ADK."""
-        # Use native Gemini model directly (better performance than LiteLLM)
-        # Match the orchestrator model for consistency
+        # Use native Gemini model directly
         model_name = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
 
         return LlmAgent(
-            model=model_name,  # Direct model string, no LiteLlm wrapper needed
+            model=model_name,
             name='budget_agent',
             description='An agent that estimates travel costs and creates detailed budget breakdowns',
             instruction="""
@@ -130,33 +120,20 @@ Make realistic estimates based on:
 
 Return ONLY valid JSON, no markdown code blocks, no other text.
             """,
-            tools=[],  # No tools needed for this agent currently
+            tools=[],
         )
 
     async def invoke(self, query: str, session_id: str) -> str:
-        """
-        Generate budget estimation using ADK runner.
-
-        Args:
-            query: The user's travel budget request
-            session_id: Session ID for conversation continuity
-
-        Returns:
-            str: JSON string with budget breakdown
-        """
-        # Get or create session
         session = await self._runner.session_service.get_session(
             app_name=self._agent.name,
             user_id=self._user_id,
             session_id=session_id,
         )
 
-        # Create content object for the query
         content = types.Content(
             role='user', parts=[types.Part.from_text(text=query)]
         )
 
-        # Create session if it doesn't exist
         if session is None:
             session = await self._runner.session_service.create_session(
                 app_name=self._agent.name,
@@ -165,61 +142,50 @@ Return ONLY valid JSON, no markdown code blocks, no other text.
                 session_id=session_id,
             )
 
-        # Run the agent and wait for final response
         response_text = ''
         async for event in self._runner.run_async(
             user_id=self._user_id,
             session_id=session.id,
             new_message=content
         ):
-            # Wait for the final response
             if event.is_final_response():
                 if (
                     event.content
                     and event.content.parts
                     and event.content.parts[0].text
                 ):
-                    # Extract text from all parts
                     response_text = '\n'.join(
                         [p.text for p in event.content.parts if p.text]
                     )
                 break
 
-        # Try to parse and validate JSON response
         content_str = response_text.strip()
 
-        # Try to extract JSON from markdown code blocks if present
         if "```json" in content_str:
             content_str = content_str.split("```json")[1].split("```")[0].strip()
         elif "```" in content_str:
             content_str = content_str.split("```")[1].split("```")[0].strip()
 
         try:
-            # Validate it's proper JSON
             structured_data = json.loads(content_str)
             validated_budget = StructuredBudget(**structured_data)
-
-            # Return JSON string
             final_response = json.dumps(validated_budget.model_dump(), indent=2)
             print("✅ Successfully created structured budget")
             return final_response
         except json.JSONDecodeError as e:
             print(f"❌ JSON parsing error: {e}")
             print(f"Content: {content_str}")
-            # Fallback
             return json.dumps({
                 "error": "Failed to generate structured budget",
                 "raw_content": content_str[:200]
             })
         except Exception as e:
             print(f"❌ Validation error: {e}")
-            # Fallback
             return json.dumps({
                 "error": f"Validation failed: {str(e)}"
             })
 
 
-# Define the A2A agent card
 port = int(os.getenv("BUDGET_PORT", 9002))
 
 skill = AgentSkill(
@@ -248,8 +214,6 @@ public_agent_card = AgentCard(
 
 
 class BudgetAgentExecutor(AgentExecutor):
-    """A2A Protocol executor for the Budget Agent using ADK streaming."""
-
     def __init__(self):
         self.agent = BudgetAgent()
 
@@ -258,33 +222,18 @@ class BudgetAgentExecutor(AgentExecutor):
         context: RequestContext,
         event_queue: EventQueue,
     ) -> None:
-        """
-        Execute the agent and send results back via A2A Protocol.
-
-        Waits for the complete response and returns it as a single message.
-        """
-        # Extract the user's query from the context
         query = context.get_user_input()
-
-        # Use a session ID from context if available, otherwise generate one
         session_id = getattr(context, 'context_id', 'default_session')
-
-        # Get the final result from the agent
         final_content = await self.agent.invoke(query, session_id)
-
-        # Send the final result as a simple text message
         await event_queue.enqueue_event(new_agent_text_message(final_content))
 
     async def cancel(
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
-        """Cancel is not currently supported for this agent."""
         raise Exception('cancel not supported')
 
 
 def main():
-    # Check for required API key (ADK/LiteLLM will handle authentication)
-    # Support both GOOGLE_API_KEY and GEMINI_API_KEY for compatibility
     if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
         print("⚠️  Warning: No API key found!")
         print("   Set either GOOGLE_API_KEY or GEMINI_API_KEY environment variable")
@@ -292,7 +241,6 @@ def main():
         print("   Get a key from: https://aistudio.google.com/app/apikey")
         print()
 
-    # Create the A2A server with the budget agent executor
     request_handler = DefaultRequestHandler(
         agent_executor=BudgetAgentExecutor(),
         task_store=InMemoryTaskStore(),

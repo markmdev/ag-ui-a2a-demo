@@ -41,9 +41,7 @@ from google.adk.artifacts import InMemoryArtifactService
 from google.genai import types
 
 
-# Pydantic models for structured restaurant output
 class DayMeals(BaseModel):
-    """Structured data for one day's meal recommendations."""
     day: int = Field(description="Day number")
     breakfast: str = Field(description="Breakfast recommendation with restaurant name and dish")
     lunch: str = Field(description="Lunch recommendation with restaurant name and dish")
@@ -51,23 +49,17 @@ class DayMeals(BaseModel):
 
 
 class StructuredRestaurants(BaseModel):
-    """Complete structured restaurant recommendations output - day by day meals."""
     destination: str = Field(description="Destination city/location")
     days: int = Field(description="Number of days")
     meals: List[DayMeals] = Field(description="Day-by-day meal recommendations")
 
 
 class RestaurantAgent:
-    """ADK-based restaurant recommendation agent."""
-
     SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']
 
     def __init__(self):
-        # Build the ADK agent
         self._agent = self._build_agent()
         self._user_id = 'remote_agent'
-
-        # Initialize the ADK runner with required services
         self._runner = Runner(
             app_name=self._agent.name,
             agent=self._agent,
@@ -77,7 +69,6 @@ class RestaurantAgent:
         )
 
     def _build_agent(self) -> LlmAgent:
-        """Build the LLM agent for restaurant recommendations using ADK."""
         model_name = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
 
         return LlmAgent(
@@ -123,33 +114,20 @@ IMPORTANT RULES:
 
 Return ONLY valid JSON, no markdown code blocks, no other text.
             """,
-            tools=[],  # No tools needed for this agent
+            tools=[],
         )
 
     async def invoke(self, query: str, session_id: str) -> str:
-        """
-        Generate restaurant recommendations using ADK runner.
-
-        Args:
-            query: The user's restaurant request (may include itinerary context)
-            session_id: Session ID for conversation continuity
-
-        Returns:
-            str: JSON string with restaurant recommendations
-        """
-        # Get or create session
         session = await self._runner.session_service.get_session(
             app_name=self._agent.name,
             user_id=self._user_id,
             session_id=session_id,
         )
 
-        # Create content object for the query
         content = types.Content(
             role='user', parts=[types.Part.from_text(text=query)]
         )
 
-        # Create session if it doesn't exist
         if session is None:
             session = await self._runner.session_service.create_session(
                 app_name=self._agent.name,
@@ -158,61 +136,50 @@ Return ONLY valid JSON, no markdown code blocks, no other text.
                 session_id=session_id,
             )
 
-        # Run the agent and wait for final response
         response_text = ''
         async for event in self._runner.run_async(
             user_id=self._user_id,
             session_id=session.id,
             new_message=content
         ):
-            # Wait for the final response
             if event.is_final_response():
                 if (
                     event.content
                     and event.content.parts
                     and event.content.parts[0].text
                 ):
-                    # Extract text from all parts
                     response_text = '\n'.join(
                         [p.text for p in event.content.parts if p.text]
                     )
                 break
 
-        # Try to parse and validate JSON response
         content_str = response_text.strip()
 
-        # Try to extract JSON from markdown code blocks if present
         if "```json" in content_str:
             content_str = content_str.split("```json")[1].split("```")[0].strip()
         elif "```" in content_str:
             content_str = content_str.split("```")[1].split("```")[0].strip()
 
         try:
-            # Validate it's proper JSON
             structured_data = json.loads(content_str)
             validated_restaurants = StructuredRestaurants(**structured_data)
-
-            # Return JSON string
             final_response = json.dumps(validated_restaurants.model_dump(), indent=2)
             print("✅ Successfully created structured restaurant recommendations")
             return final_response
         except json.JSONDecodeError as e:
             print(f"❌ JSON parsing error: {e}")
             print(f"Content: {content_str}")
-            # Fallback
             return json.dumps({
                 "error": "Failed to generate structured restaurant recommendations",
                 "raw_content": content_str[:200]
             })
         except Exception as e:
             print(f"❌ Validation error: {e}")
-            # Fallback
             return json.dumps({
                 "error": f"Validation failed: {str(e)}"
             })
 
 
-# Define the A2A agent card
 port = int(os.getenv("RESTAURANT_PORT", 9003))
 
 skill = AgentSkill(
@@ -241,8 +208,6 @@ public_agent_card = AgentCard(
 
 
 class RestaurantAgentExecutor(AgentExecutor):
-    """A2A Protocol executor for the Restaurant Agent using ADK streaming."""
-
     def __init__(self):
         self.agent = RestaurantAgent()
 
@@ -251,34 +216,18 @@ class RestaurantAgentExecutor(AgentExecutor):
         context: RequestContext,
         event_queue: EventQueue,
     ) -> None:
-        """
-        Execute the agent and send results back via A2A Protocol.
-
-        This agent can be called by:
-        1. The orchestrator (via A2A middleware)
-        2. Other A2A agents directly (peer-to-peer communication)
-        """
-        # Extract the user's query from the context
         query = context.get_user_input()
-
-        # Use a session ID from context if available, otherwise generate one
         session_id = getattr(context, 'context_id', 'default_session')
-
-        # Get the final result from the agent
         final_content = await self.agent.invoke(query, session_id)
-
-        # Send the final result as a simple text message
         await event_queue.enqueue_event(new_agent_text_message(final_content))
 
     async def cancel(
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
-        """Cancel is not currently supported for this agent."""
         raise Exception('cancel not supported')
 
 
 def main():
-    # Check for required API key
     if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
         print("⚠️  Warning: No API key found!")
         print("   Set either GOOGLE_API_KEY or GEMINI_API_KEY environment variable")
@@ -286,7 +235,6 @@ def main():
         print("   Get a key from: https://aistudio.google.com/app/apikey")
         print()
 
-    # Create the A2A server with the restaurant agent executor
     request_handler = DefaultRequestHandler(
         agent_executor=RestaurantAgentExecutor(),
         task_store=InMemoryTaskStore(),

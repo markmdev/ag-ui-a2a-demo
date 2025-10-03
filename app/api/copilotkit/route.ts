@@ -1,108 +1,49 @@
 /**
  * CopilotKit API Route with A2A Middleware
  *
- * This route is the core of the multi-agent demo. It sets up the connection between:
- * 1. The Next.js frontend (using CopilotKit)
- * 2. The A2A Middleware (which wraps the orchestrator)
- * 3. The orchestrator agent (ADK agent via AG-UI Protocol)
- * 4. The A2A agents (4 specialized agents using A2A Protocol)
- *
- * ARCHITECTURE FLOW:
- * ==================
- * Frontend (CopilotKit)
- *    ↓ HTTP/WebSocket (AG-UI Protocol)
- * A2A Middleware Agent (This route)
- *    ↓ Adds send_message_to_a2a_agent tool
- * Orchestrator Agent (Port 9000)
- *    ↓ Uses send_message_to_a2a_agent tool
- * A2A Agents (Ports 9001-9005)
- *    ↓ Returns structured JSON
- * Orchestrator receives results
- *    ↓ Returns to middleware
- * Frontend renders data as generative UI
+ * Sets up the connection between:
+ * - Frontend (CopilotKit) → A2A Middleware → Orchestrator → A2A Agents
  *
  * KEY CONCEPTS:
- * =============
- * - AG-UI Protocol: Standardized agent-UI communication (CopilotKit ↔ Orchestrator)
- * - A2A Protocol: Standardized agent-to-agent communication (Orchestrator ↔ Specialized Agents)
- * - A2A Middleware: Bridges AG-UI and A2A protocols by injecting the send_message_to_a2a_agent tool
+ * - AG-UI Protocol: Agent-UI communication (CopilotKit ↔ Orchestrator)
+ * - A2A Protocol: Agent-to-agent communication (Orchestrator ↔ Specialized Agents)
+ * - A2A Middleware: Injects send_message_to_a2a_agent tool to bridge AG-UI and A2A
  */
 
-// CopilotKit runtime for connecting frontend to agents
 import {
   CopilotRuntime,
   ExperimentalEmptyAdapter,
   copilotRuntimeNextJSAppRouterEndpoint,
 } from "@copilotkit/runtime";
-
-// AG-UI client for wrapping agents that speak AG-UI Protocol
 import { HttpAgent } from "@ag-ui/client";
-
-// A2A Middleware for connecting orchestrator to A2A agents
 import { A2AMiddlewareAgent } from "@ag-ui/a2a-middleware";
-
 import { NextRequest } from "next/server";
 
-/**
- * POST Handler - Main API Endpoint
- *
- * This endpoint is called by CopilotKit on the frontend to communicate
- * with the agent system. It sets up the entire multi-agent architecture.
- */
 export async function POST(request: NextRequest) {
-  // ========================================================================
-  // STEP 1: Define A2A Agent URLs
-  // ========================================================================
-  // These agents speak the A2A Protocol and can be called by the orchestrator
-  // via the send_message_to_a2a_agent tool that the middleware provides
-  // LangGraph Agent
+  // STEP 1: Define A2A agent URLs
   const itineraryAgentUrl = process.env.ITINERARY_AGENT_URL || "http://localhost:9001";
-
-  // ADK Agents (Python + Gemini)
   const budgetAgentUrl = process.env.BUDGET_AGENT_URL || "http://localhost:9002";
   const restaurantAgentUrl = process.env.RESTAURANT_AGENT_URL || "http://localhost:9003";
   const weatherAgentUrl = process.env.WEATHER_AGENT_URL || "http://localhost:9005";
 
-  // ========================================================================
-  // STEP 2: Define Orchestrator URL
-  // ========================================================================
-  // The orchestrator is an ADK agent that speaks AG-UI Protocol
-  // It coordinates all other agents via A2A Protocol
+  // STEP 2: Define orchestrator URL (speaks AG-UI Protocol)
   const orchestratorUrl = process.env.ORCHESTRATOR_URL || "http://localhost:9000";
 
-  // ========================================================================
-  // STEP 3: Wrap Orchestrator with HttpAgent
-  // ========================================================================
-  // HttpAgent is an AG-UI client that connects to agents speaking AG-UI Protocol
-  // It handles the HTTP communication and message formatting
+  // STEP 3: Wrap orchestrator with HttpAgent (AG-UI client)
   const orchestrationAgent = new HttpAgent({
     url: orchestratorUrl,
   });
 
-  // ========================================================================
   // STEP 4: Create A2A Middleware Agent
-  // ========================================================================
-  // This is the magic that connects everything together!
-  //
-  // The A2A Middleware Agent:
-  // 1. Wraps the orchestrator agent
-  // 2. Automatically registers all A2A agents (via their URLs)
-  // 3. Injects a send_message_to_a2a_agent tool into the orchestrator
-  // 4. Intercepts calls to that tool and routes them to the appropriate A2A agent
-  // 5. Returns the results back to the orchestrator
-  //
-  // This allows the orchestrator to communicate with A2A agents without
-  // needing to know anything about the A2A Protocol!
+  // This bridges AG-UI and A2A protocols by:
+  // 1. Wrapping the orchestrator
+  // 2. Registering all A2A agents
+  // 3. Injecting send_message_to_a2a_agent tool
+  // 4. Routing messages between orchestrator and A2A agents
   const a2aMiddlewareAgent = new A2AMiddlewareAgent({
-    // Human-readable description of this agent system
     description:
       "Travel planning assistant with 4 specialized agents: Itinerary and Restaurant (LangGraph), Weather and Budget (ADK)",
 
-    // Register all A2A agents by URL
-    // The middleware will automatically:
-    // - Fetch their agent cards to learn their capabilities
-    // - Create routing logic for the orchestrator
-    // - Inject the send_message_to_a2a_agent tool
     agentUrls: [
       itineraryAgentUrl, // LangGraph + OpenAI
       restaurantAgentUrl, // ADK + Gemini
@@ -110,13 +51,9 @@ export async function POST(request: NextRequest) {
       weatherAgentUrl, // ADK + Gemini
     ],
 
-    // The orchestrator agent that will coordinate everything
     orchestrationAgent,
 
-    // Domain-specific instructions for the orchestrator
-    // Note: The middleware automatically adds comprehensive routing instructions
-    // based on the registered agents' capabilities, so we only need to provide
-    // workflow-specific guidance here
+    // Workflow instructions (middleware auto-adds routing info)
     instructions: `
       You are a travel planning assistant that orchestrates between 4 specialized agents.
 
@@ -187,31 +124,19 @@ export async function POST(request: NextRequest) {
     `,
   });
 
-  // ========================================================================
   // STEP 5: Create CopilotKit Runtime
-  // ========================================================================
-  // The CopilotKit runtime manages the connection between the frontend
-  // and the agent system. It handles message streaming, state management,
-  // and action execution.
   const runtime = new CopilotRuntime({
     agents: {
-      // Register our A2A middleware agent
-      // The key "a2a_chat" must match the agent prop in the frontend
-      // CopilotKit component: <CopilotKit agent="a2a_chat">
-      a2a_chat: a2aMiddlewareAgent,
+      a2a_chat: a2aMiddlewareAgent, // Must match frontend: <CopilotKit agent="a2a_chat">
     },
   });
 
-  // ========================================================================
-  // STEP 6: Set Up Next.js Endpoint Handler
-  // ========================================================================
-  // This creates the actual HTTP endpoint that the frontend will call
+  // STEP 6: Set up Next.js endpoint handler
   const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
     runtime,
-    serviceAdapter: new ExperimentalEmptyAdapter(), // No LLM adapter needed (agents handle LLM calls)
+    serviceAdapter: new ExperimentalEmptyAdapter(),
     endpoint: "/api/copilotkit",
   });
 
-  // Handle the incoming request from the frontend
   return handleRequest(request);
 }
