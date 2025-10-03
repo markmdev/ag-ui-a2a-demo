@@ -2,6 +2,70 @@
 
 A demonstration of Agent-to-Agent (A2A) communication between different AI agent frameworks using the AG-UI Protocol and A2A Middleware.
 
+![Screenshot of a demo](demo.png)
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- Python 3.10+
+- [Google API Key](https://aistudio.google.com/app/apikey)
+- [OpenAI API Key](https://platform.openai.com/api-keys)
+
+### Setup
+
+1. Install frontend dependencies:
+
+```bash
+npm install
+```
+
+2. Install Python dependencies:
+
+```bash
+cd agents
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+3. Configure environment variables:
+
+```bash
+cp .env.example .env
+# Edit .env and add your GOOGLE_API_KEY and OPENAI_API_KEY
+```
+
+4. Start all services:
+
+```bash
+npm run dev
+```
+
+This starts:
+
+- UI on `http://localhost:3000`
+- Orchestrator on `http://localhost:9000`
+- Itinerary Agent on `http://localhost:9001`
+- Budget Agent on `http://localhost:9002`
+- Restaurant Agent on `http://localhost:9003`
+- Weather Agent on `http://localhost:9005`
+
+## Usage
+
+Try asking: "Plan a 3-day trip to Tokyo" or "I want to visit New York for 5 days"
+
+The orchestrator will coordinate the agents to:
+
+1. Collect trip requirements (destination, days, people, budget level)
+2. Generate an itinerary
+3. Provide weather forecast
+4. Recommend restaurants for each day
+5. Estimate budget and request approval
+
+Agent interactions are visible in the UI with message flow visualization.
+
 ## What This Demonstrates
 
 This demo shows how specialized agents built with different frameworks can communicate via the A2A protocol:
@@ -49,62 +113,6 @@ The demo includes multi-framework integration, structured JSON outputs, generati
 │ (Port 9000)     │
 └─────────────────┘
 ```
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js 18+
-- Python 3.10+
-- [Google API Key](https://aistudio.google.com/app/apikey)
-- [OpenAI API Key](https://platform.openai.com/api-keys)
-
-### Setup
-
-1. Install frontend dependencies:
-```bash
-npm install
-```
-
-2. Install Python dependencies:
-```bash
-cd agents
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-3. Configure environment variables:
-```bash
-cp .env.example .env
-# Edit .env and add your GOOGLE_API_KEY and OPENAI_API_KEY
-```
-
-4. Start all services:
-```bash
-npm run dev
-```
-
-This starts:
-- UI on `http://localhost:3000`
-- Orchestrator on `http://localhost:9000`
-- Itinerary Agent on `http://localhost:9001`
-- Budget Agent on `http://localhost:9002`
-- Restaurant Agent on `http://localhost:9003`
-- Weather Agent on `http://localhost:9005`
-
-## Usage
-
-Try asking: "Plan a 3-day trip to Tokyo" or "I want to visit New York for 5 days"
-
-The orchestrator will coordinate the agents to:
-1. Collect trip requirements (destination, days, people, budget level)
-2. Generate an itinerary
-3. Provide weather forecast
-4. Recommend restaurants for each day
-5. Estimate budget and request approval
-
-Agent interactions are visible in the UI with message flow visualization.
 
 ## Project Structure
 
