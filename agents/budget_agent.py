@@ -50,8 +50,6 @@ class StructuredBudget(BaseModel):
 
 
 class BudgetAgent:
-    SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']
-
     def __init__(self):
         self._agent = self._build_agent()
         self._user_id = 'remote_agent'

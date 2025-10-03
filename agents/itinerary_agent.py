@@ -26,8 +26,7 @@ from a2a.server.events import EventQueue
 from a2a.utils import new_agent_text_message
 from langgraph.graph import StateGraph, END
 from langchain_openai import ChatOpenAI
-from typing import TypedDict, Annotated, List, Optional
-import operator
+from typing import TypedDict, List, Optional
 from pydantic import BaseModel, Field
 
 

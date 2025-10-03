@@ -55,8 +55,6 @@ class StructuredRestaurants(BaseModel):
 
 
 class RestaurantAgent:
-    SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']
-
     def __init__(self):
         self._agent = self._build_agent()
         self._user_id = 'remote_agent'
